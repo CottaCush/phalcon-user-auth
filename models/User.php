@@ -2,6 +2,7 @@
 
 namespace UserAuth\Models;
 
+use Phalcon\Exception as Exception;
 use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Relation;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
@@ -59,9 +60,14 @@ class User extends Model
     protected $created_at;
 
     /**
-     * @var
+     * @var string
      */
     protected $updated_at;
+
+    /**
+     * @var integer
+     */
+    protected $status;
 
 
     /**
@@ -103,18 +109,19 @@ class User extends Model
      */
     public function initialize()
     {
-        $this->hasMany('id', 'UserAuth\models\UserPasswordChange', 'user_id', array(
+        $this->hasMany('user_cred_id', 'UserAuth\models\UserPasswordChange', 'user_id', [
             'alias' => 'password-changes',
-            'foreignKey' => array(
+            'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
-            ),
-        ));
-        $this->hasMany('id', 'UserAuth\models\UserPasswordReset', 'user_id', array(
+            ],
+        ]);
+
+        $this->hasMany('user_cred_id', 'UserAuth\models\UserPasswordReset', 'user_id', [
             'alias' => 'reset-password',
-            'foreignKey' => array(
+            'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
-            ),
-        ));
+            ],
+        ]);
     }
 
 
@@ -124,6 +131,7 @@ class User extends Model
     public function beforeCreate()
     {
         $this->password = Utils::encryptPassword($this->password);
+        $this->created_at = date("Y-m-d H:i:s");
     }
 
     /**
@@ -134,24 +142,36 @@ class User extends Model
         $this->updated_at = date("Y-m-d H:i:s");
     }
 
-    //todo declare setters and getters for all fields
-
     /**
-     * Setter for email
-     * @param string $email
+     * Function to create a user's login credentials
+     * @param $email
+     * @param $password
+     * @param bool|false $setActive
+     * @return bool
      */
-    public function setEmail($email)
+    public function createUser($email, $password, $setActive = false)
     {
-        $this->email = $email;
+        try {
+            return $this->create([
+                'email' => $email,
+                'password' => $password,
+                'active' => $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE
+            ]);
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**
-     * Get a user's email
+     * Generate random password
+     *
+     * @param int $length
+     * @param bool|false $strict (if set to , a symbol will be added to the password)
      * @return string
      */
-    public function getEmail()
+    public function generateRandomPassword($length = 8, $strict = false)
     {
-        return $this->email;
+        return Utils::generateRandomPassword($length, $strict);
     }
 
 }
