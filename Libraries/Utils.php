@@ -2,6 +2,9 @@
 
 namespace UserAuth\Lib;
 
+use \Phalcon\Security as Security;
+use \Phalcon\Text as Text;
+
 /**
  * Class Utils
  * @author Tega Oghenekohwo <tega@cottacush.com>
@@ -18,11 +21,8 @@ class Utils
      */
     public static function encryptPassword($rawPassword)
     {
-        $options = [
-            'salt' => mcrypt_create_iv(22, MCRYPT_DEV_URANDOM),
-        ];
-
-        return  password_hash($rawPassword, PASSWORD_BCRYPT, $options);
+        $security = new Security();
+        return $security->hash($rawPassword);
     }
 
 
@@ -36,7 +36,8 @@ class Utils
     public static function verifyPassword($rawPassword, $dbHash)
     {
         //todo test this with many randomly generated passwords for vulnerabilities.
-        return password_verify($rawPassword, $dbHash);
+        $security = new Security();
+        return $security->checkHash($rawPassword, $dbHash);
     }
 
 
@@ -48,16 +49,7 @@ class Utils
      */
     public static function generateRandomPassword($length = 8, $strict = true)
     {
-        $passwordArray = [];
-
-        $randomString = str_shuffle("abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ1234567890");
-
-        for ($i = 0; $i < $length; $i++) {
-            $n = rand(0, strlen($randomString) - 1);
-            $passwordArray[] = $randomString[$n];
-        }
-
-        $password = implode($passwordArray);
+        $password = Text::random(Text::RANDOM_ALNUM, $length);
 
         if (!$strict) {
             return $password;
