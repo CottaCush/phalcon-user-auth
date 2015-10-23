@@ -109,15 +109,15 @@ class User extends Model
      */
     public function initialize()
     {
-        $this->hasMany('user_cred_id', 'UserAuth\models\UserPasswordChange', 'user_id', [
-            'alias' => 'password-changes',
+        $this->hasMany('user_cred_id', 'UserAuth\Models\UserPasswordChange', 'user_id', [
+            'alias' => 'PasswordChanges',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
 
-        $this->hasMany('user_cred_id', 'UserAuth\models\UserPasswordReset', 'user_id', [
-            'alias' => 'reset-password',
+        $this->hasMany('user_cred_id', 'UserAuth\Models\UserPasswordReset', 'user_id', [
+            'alias' => 'PasswordResets',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],

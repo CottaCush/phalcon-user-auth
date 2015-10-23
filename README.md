@@ -29,7 +29,7 @@ modify your composer.json
 ```json
     "require": {
         ...
-        "vendor/user-auth": "master"
+        "user-auth": "dev-master"
         ...
     },
     "repositories": [
