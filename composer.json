@@ -1,0 +1,19 @@
+{
+  "name" : "user-auth",
+  "description" : "User Auth is a library for managing user credentials",
+  "keywords": ["phalcon", "library", "user", "auth", "login"],
+  "homepage": "https://bitbucket.org/cottacush/user-auth#readme",
+  "type": "library",
+  "version" : "1.0.0",
+  "authors": [
+    {
+      "name": "Tega Oghenekohwo",
+      "email": "tega@cottacush.com",
+      "role": "Creator"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.3",
+    "ext-phalcon" : ">=2.0.0"
+  }
+}
