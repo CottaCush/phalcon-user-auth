@@ -51,8 +51,8 @@ Run the following SQL (This will be managed later using Phinx)
 ```
 CREATE TABLE `user_credentials` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(100) DEFAULT NULL,
+  `email` varchar(100) NOT NULLL,
+  `password` varchar(100) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NULL DEFAULT NULL,
@@ -64,8 +64,8 @@ CREATE TABLE `user_credentials` (
 CREATE TABLE `user_password_changes` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `date_changed` timestamp NULL DEFAULT NULL,
-  `previous_hash` varchar(45) DEFAULT NULL,
+  `date_changed` datetime NOT NULL,
+  `previous_hash` varchar(45) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_upc_user_id_idx` (`user_id`),
   CONSTRAINT `FK_upc_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -74,8 +74,8 @@ CREATE TABLE `user_password_changes` (
 CREATE TABLE `user_password_reset` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `token` varchar(200) DEFAULT NULL,
-  `date_requested` datetime NULL DEFAULT NULL,
+  `token` varchar(200) NOT NULL,
+  `date_requested` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_upc_user_id_idx` (`user_id`),
   CONSTRAINT `FK_upr_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
