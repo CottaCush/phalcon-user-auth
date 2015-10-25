@@ -42,7 +42,7 @@ class User extends Model
     /**
      * @var integer
      */
-    protected $user_id;
+    protected $id;
 
     /**
      * @var string
@@ -142,11 +142,10 @@ class User extends Model
     }
 
     /**
-     * Function to create a user's login credentials
      * @param $email
      * @param $password
      * @param bool|false $setActive
-     * @return bool
+     * @return bool|int
      */
     public function createUser($email, $password, $setActive = false)
     {
@@ -155,7 +154,11 @@ class User extends Model
             $this->password = $password;
             $this->created_at = date("Y-m-d H:i:s");
             $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
-            return $this->create();
+            if (!$this->create()) {
+                //todo save error somewhere retrievable or throw exception that can be caught by caller
+                return false;
+            }
+            return $this->id;
         } catch (Exception $e) {
             return false;
         }
