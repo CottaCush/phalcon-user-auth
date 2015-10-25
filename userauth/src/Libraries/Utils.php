@@ -1,6 +1,6 @@
 <?php
 
-namespace UserAuth\Lib;
+namespace UserAuth\Libraries;
 
 use \Phalcon\Security as Security;
 use \Phalcon\Text as Text;

@@ -51,7 +51,7 @@ Run the following SQL (This will be managed later using Phinx)
 ```
 CREATE TABLE `user_credentials` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `email` varchar(100) NOT NULLL,
+  `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `status` int(1) DEFAULT NULL,
   `created_at` datetime NOT NULL,

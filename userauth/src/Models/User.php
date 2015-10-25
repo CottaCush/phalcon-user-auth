@@ -7,7 +7,7 @@ use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Relation;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
 use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
-use UserAuth\Lib\Utils;
+use UserAuth\Libraries\Utils;
 
 
 /**
@@ -131,7 +131,6 @@ class User extends Model
     public function beforeCreate()
     {
         $this->password = Utils::encryptPassword($this->password);
-        $this->created_at = date("Y-m-d H:i:s");
     }
 
     /**
@@ -152,11 +151,11 @@ class User extends Model
     public function createUser($email, $password, $setActive = false)
     {
         try {
-            return $this->create([
-                'email' => $email,
-                'password' => $password,
-                'active' => $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE
-            ]);
+            $this->email = $email;
+            $this->password = $password;
+            $this->created_at = date("Y-m-d H:i:s");
+            $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
+            return $this->create();
         } catch (Exception $e) {
             return false;
         }
