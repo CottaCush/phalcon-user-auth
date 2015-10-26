@@ -14,7 +14,11 @@
   ],
   "require": {
     "php": ">=5.3.3",
-    "ext-phalcon" : ">=2.0.0"
+    "ext-phalcon" : ">=2.0.0",
+    "phalcon/incubator": "dev-master"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.5"
   },
   "autoload": {
     "psr-4": {
