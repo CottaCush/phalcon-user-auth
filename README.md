@@ -71,7 +71,7 @@ CREATE TABLE `user_password_changes` (
   CONSTRAINT `FK_upc_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `user_password_reset` (
+CREATE TABLE `user_password_resets` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `token` varchar(200) NOT NULL,
