@@ -26,13 +26,12 @@ class RegisterTest extends \UnitTestCase
      */
     public function tearDown()
     {
-        foreach (User::find() as $user) {
-            if ($user->delete() == false) {
-                echo "Sorry, we can't delete the user right now: \n";
-
-                foreach ($user->getMessages() as $message) {
-                    echo $message, "\n";
-                }
+        $users = User::find();
+        $users = $users->toArray();
+        foreach ($users as $user) {
+            $userToDelete = User::findFirst($user['id']);
+            if (!$userToDelete->delete()) {
+                echo "Sorry, we can't delete the user {$user['id']} right now: \n";
             }
         }
     }

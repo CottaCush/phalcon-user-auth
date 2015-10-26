@@ -2,9 +2,13 @@
 
 use Phalcon\DI;
 use Phalcon\Test\UnitTestCase as PhalconTestCase;
+use UserAuth\Models\User;
 
 abstract class UnitTestCase extends PhalconTestCase
 {
+    protected $valid_test_email = 'test123@yahoo.com';
+    protected $valid_test_password = 'test';
+
     /**
      * @var \Voice\Cache
      */
@@ -41,6 +45,21 @@ abstract class UnitTestCase extends PhalconTestCase
     {
         if (!$this->_loaded) {
             throw new \PHPUnit_Framework_IncompleteTestError('Please run parent::setUp().');
+        }
+    }
+
+    /**
+     * Clear test table(s)
+     */
+    public function clearTables()
+    {
+        $users = User::find();
+        $users = $users->toArray();
+        foreach ($users as $user) {
+            $userToDelete = User::findFirst($user['id']);
+            if (!$userToDelete->delete()) {
+                echo "Sorry, we can't delete the user {$user['id']} right now: \n";
+            }
         }
     }
 }

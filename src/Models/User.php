@@ -176,4 +176,34 @@ class User extends Model
         return Utils::generateRandomPassword($length, $strict);
     }
 
+
+    /**
+     * @param $email
+     * @param $password
+     * @return bool
+     */
+    public function authenticate($email, $password)
+    {
+        try {
+            $user = User::findFirst([
+                "email = :email:",
+                'bind' => ['email' => $email]
+            ]);
+
+            if ($user == false) {
+                return false;
+            }
+
+            //validate password
+            if (!Utils::verifyPassword($password, $user->password)) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
+    }
+
 }
