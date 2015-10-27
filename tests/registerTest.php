@@ -40,13 +40,13 @@ class RegisterTest extends \UnitTestCase
 
 
         //set a valid email, and a password
-        $this->email = 'test123@yahoo.com';
-        $this->password = 'test';
+        $this->email = $this->valid_test_email;
+        $this->password = $this->valid_test_password;
         $response = $this->register();
         $this->assertNotFalse($response);
 
         //create another user
-        $this->email = 'test1234@yahoo.com';
+        $this->email = 'ptega@mailinator.com';
         $response = $this->register();
         $this->assertNotFalse($response);
 
