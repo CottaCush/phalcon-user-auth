@@ -142,8 +142,8 @@ class User extends Model
     }
 
     /**
-     * @param $email
-     * @param $password
+     * @param string $email
+     * @param string $password
      * @param bool|false $setActive
      * @return bool|int
      */
@@ -160,7 +160,6 @@ class User extends Model
             }
             return $this->id;
         } catch (Exception $e) {
-            echo "Exception during Registration: " . $e->getMessage() . PHP_EOL;
             return false;
         }
     }
@@ -179,8 +178,8 @@ class User extends Model
 
 
     /**
-     * @param $email
-     * @param $password
+     * @param string $email
+     * @param string $password
      * @return bool
      */
     public function authenticate($email, $password)
@@ -204,6 +203,17 @@ class User extends Model
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * @param string $previousPassword
+     * @param string $newPassword
+     * @param int $max the maximum number of changes before a password can be re-used
+     * @return bool
+     */
+    public function changePassword($previousPassword, $newPassword, $max = UserPasswordChange::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
+    {
+        return UserPasswordChange::changePassword($previousPassword, $newPassword, $max);
     }
 
 }
