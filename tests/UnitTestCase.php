@@ -10,11 +10,6 @@ abstract class UnitTestCase extends PhalconTestCase
     protected $valid_test_password = 'test';
 
     /**
-     * @var \Voice\Cache
-     */
-    protected $_cache;
-
-    /**
      * @var \Phalcon\Config
      */
     protected $_config;
