@@ -57,4 +57,12 @@ abstract class UnitTestCase extends PhalconTestCase
             }
         }
     }
+
+    /**
+     * Override the parent's tearDown function to avoid it from resetting the DI
+     * if a Test Class does not provide its own tearDown method
+     */
+    public function tearDown()
+    {
+    }
 }

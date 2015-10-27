@@ -160,6 +160,7 @@ class User extends Model
             }
             return $this->id;
         } catch (Exception $e) {
+            echo "Exception during Registration: " . $e->getMessage() . PHP_EOL;
             return false;
         }
     }
@@ -168,10 +169,10 @@ class User extends Model
      * Generate random password
      *
      * @param int $length
-     * @param bool|false $strict (if set to , a symbol will be added to the password)
+     * @param bool|true $strict (if set to true, a symbol will be added to the password)
      * @return string
      */
-    public function generateRandomPassword($length = 8, $strict = false)
+    public static function generateRandomPassword($length = 8, $strict = true)
     {
         return Utils::generateRandomPassword($length, $strict);
     }
@@ -201,7 +202,6 @@ class User extends Model
 
             return true;
         } catch (Exception $e) {
-            echo $e->getMessage();
             return false;
         }
     }

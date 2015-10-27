@@ -24,7 +24,7 @@ CREATE TABLE `user_password_resets` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `token` varchar(200) NOT NULL,
-  `date_requested` datetime NOT NULL,
+  `date_requested` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_upc_user_id_idx` (`user_id`),
   CONSTRAINT `FK_upr_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

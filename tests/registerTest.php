@@ -16,24 +16,12 @@ class RegisterTest extends \UnitTestCase
     private $email;
     private $password;
 
-    public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
-    {
-        parent::setUp(Di::getDefault());
-    }
-
     /**
      * Delete all user's in the table
      */
     public function tearDown()
     {
-        $users = User::find();
-        $users = $users->toArray();
-        foreach ($users as $user) {
-            $userToDelete = User::findFirst($user['id']);
-            if (!$userToDelete->delete()) {
-                echo "Sorry, we can't delete the user {$user['id']} right now: \n";
-            }
-        }
+        $this->clearTables();
     }
 
 

@@ -4,7 +4,6 @@ namespace Tests;
 
 use Phalcon\DI;
 use UserAuth\Models\User;
-use Tests\TestUtils as TestUtils;
 
 
 /**
@@ -12,7 +11,7 @@ use Tests\TestUtils as TestUtils;
  * Class loginTest
  * @package Tests
  */
-class loginTest extends \UnitTestCase
+class LoginTest extends \UnitTestCase
 {
 
     private $email;
@@ -65,7 +64,6 @@ class loginTest extends \UnitTestCase
         $response = $this->login();
         $this->assertNotFalse($response, "Test Login Assertion: Valid email and valid password");
     }
-
 
     /**
      * Authenticate a user
