@@ -7,7 +7,7 @@ use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Relation;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
 use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
-use UserAuth\Lib\Utils;
+use UserAuth\Libraries\Utils;
 
 
 /**
@@ -42,7 +42,7 @@ class User extends Model
     /**
      * @var integer
      */
-    protected $user_id;
+    protected $id;
 
     /**
      * @var string
@@ -131,7 +131,6 @@ class User extends Model
     public function beforeCreate()
     {
         $this->password = Utils::encryptPassword($this->password);
-        $this->created_at = date("Y-m-d H:i:s");
     }
 
     /**
@@ -143,21 +142,25 @@ class User extends Model
     }
 
     /**
-     * Function to create a user's login credentials
      * @param $email
      * @param $password
      * @param bool|false $setActive
-     * @return bool
+     * @return bool|int
      */
     public function createUser($email, $password, $setActive = false)
     {
         try {
-            return $this->create([
-                'email' => $email,
-                'password' => $password,
-                'active' => $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE
-            ]);
+            $this->email = $email;
+            $this->password = $password;
+            $this->created_at = date("Y-m-d H:i:s");
+            $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
+            if (!$this->create()) {
+                //todo save error somewhere retrievable or throw exception that can be caught by caller
+                return false;
+            }
+            return $this->id;
         } catch (Exception $e) {
+            echo "Exception during Registration: " . $e->getMessage() . PHP_EOL;
             return false;
         }
     }
@@ -166,12 +169,41 @@ class User extends Model
      * Generate random password
      *
      * @param int $length
-     * @param bool|false $strict (if set to , a symbol will be added to the password)
+     * @param bool|true $strict (if set to true, a symbol will be added to the password)
      * @return string
      */
-    public function generateRandomPassword($length = 8, $strict = false)
+    public static function generateRandomPassword($length = 8, $strict = true)
     {
         return Utils::generateRandomPassword($length, $strict);
+    }
+
+
+    /**
+     * @param $email
+     * @param $password
+     * @return bool
+     */
+    public function authenticate($email, $password)
+    {
+        try {
+            $user = User::findFirst([
+                "email = :email:",
+                'bind' => ['email' => $email]
+            ]);
+
+            if ($user == false) {
+                return false;
+            }
+
+            //validate password
+            if (!Utils::verifyPassword($password, $user->password)) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
 }
