@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Phalcon\DI;
+use Phalcon\Exception;
 use UserAuth\Models\User;
 use UserAuth\Models\UserPasswordChange;
 
@@ -17,21 +18,14 @@ class PasswordChangeTest extends \UnitTestCase
 
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
+        $this->clearTables();
+
         //Create a new user
         $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password);
         if (empty($this->user_id)) {
             die("Set up failed for Password Change Test");
         }
         parent::setUp(Di::getDefault());
-    }
-
-
-    /**
-     * Delete all user's in the table
-     */
-    public function tearDown()
-    {
-        $this->clearTables();
     }
 
     /**
@@ -49,9 +43,21 @@ class PasswordChangeTest extends \UnitTestCase
         $passwordsHistory[]  = $previousPassword;
         $user = new User();
 
-        while ($numPasswordChangesBeforeRepeat > 0) {
+        //use a wrong password
+        try {
+            $user->changePassword($this->valid_test_email, 'incorrect', User::generateRandomPassword());
+            $this->fail("Password changed successfully even when previous password was wrong");
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\PasswordChangeException', $e);
+        }
+
+        $i = 1;
+        while ($numPasswordChangesBeforeRepeat > 1) {
             $newPassword = User::generateRandomPassword();
-            $response = $user->changePassword($previousPassword, $newPassword);
+            $i++;
+            $response = $user->changePassword($this->valid_test_email, $previousPassword, $newPassword);
+            //just to ensure seconds value for timestamp is different
+            sleep(1);
             //check that password change was successful
             $this->assertTrue($response);
 
@@ -62,17 +68,22 @@ class PasswordChangeTest extends \UnitTestCase
             //Set new password to previous password
             $previousPassword = $newPassword;
             $passwordsHistory[]  = $previousPassword;
+            $numPasswordChangesBeforeRepeat--;
         }
 
         //at this point password change should fail if we use any of the last $max passwords
         foreach ($passwordsHistory as $newPassword) {
-            $response = $user->changePassword($previousPassword, $newPassword);
-            $this->assertFalse($response);
+            try {
+                $user->changePassword($this->valid_test_email, $previousPassword, $newPassword);
+                $this->fail("Password changed successfully even when a previously used password {$newPassword} was used");
+            } catch (Exception $e) {
+                $this->assertInstanceOf('UserAuth\Exceptions\PasswordChangeException', $e);
+            }
         }
 
         //Change password one more time , then use the first used password and all should go well
         $newPassword = User::generateRandomPassword();
-        $response = $user->changePassword($previousPassword, $newPassword);
+        $response = $user->changePassword($this->valid_test_email, $previousPassword, $newPassword);
         $this->assertTrue($response);
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);
@@ -80,7 +91,7 @@ class PasswordChangeTest extends \UnitTestCase
 
         $previousPassword = $newPassword;
         $newPassword = $passwordsHistory[0];
-        $response = $user->changePassword($previousPassword, $newPassword);
+        $response = $user->changePassword($this->valid_test_email, $previousPassword, $newPassword);
         $this->assertTrue($response);
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);

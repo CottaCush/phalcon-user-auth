@@ -2,11 +2,15 @@
 
 namespace UserAuth\Models;
 
-use Phalcon\Exception as Exception;
 use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Relation;
+use Phalcon\Mvc\Model\Transaction\Failed as TransactionFailed;
+use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
 use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
+use UserAuth\Exceptions\InvalidUserCredentialsException;
+use UserAuth\Exceptions\PasswordChangeException;
+use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
 
 
@@ -145,23 +149,19 @@ class User extends Model
      * @param string $email
      * @param string $password
      * @param bool|false $setActive
-     * @return bool|int
+     * @return int the ID of the created user
+     * @throws UserCreationException
      */
     public function createUser($email, $password, $setActive = false)
     {
-        try {
-            $this->email = $email;
-            $this->password = $password;
-            $this->created_at = date("Y-m-d H:i:s");
-            $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
-            if (!$this->create()) {
-                //todo save error somewhere retrievable or throw exception that can be caught by caller
-                return false;
-            }
-            return $this->id;
-        } catch (Exception $e) {
-            return false;
+        $this->email = $email;
+        $this->password = $password;
+        $this->created_at = date("Y-m-d H:i:s");
+        $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
+        if (!$this->create()) {
+            throw new UserCreationException($this->getMessages());
         }
+        return $this->id;
     }
 
     /**
@@ -176,44 +176,124 @@ class User extends Model
         return Utils::generateRandomPassword($length, $strict);
     }
 
-
     /**
      * @param string $email
      * @param string $password
      * @return bool
+     * @throws InvalidUserCredentialsException
      */
     public function authenticate($email, $password)
     {
-        try {
-            $user = User::findFirst([
-                "email = :email:",
-                'bind' => ['email' => $email]
-            ]);
+        $user = User::findFirst([
+            "email = :email:",
+            'bind' => ['email' => $email]
+        ]);
 
-            if ($user == false) {
-                return false;
-            }
-
-            //validate password
-            if (!Utils::verifyPassword($password, $user->password)) {
-                return false;
-            }
-
-            return true;
-        } catch (Exception $e) {
-            return false;
+        if ($user == false) {
+            throw new InvalidUserCredentialsException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
+
+        //validate password
+        if (!Utils::verifyPassword($password, $user->password)) {
+            throw new InvalidUserCredentialsException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $email
+     * @param string $previousPassword
+     * @param string $newPassword
+     * @param int $max the maximum number of changes before a password can be re-used
+     * @return bool
+     * @throws InvalidUserCredentialsException
+     * @throws PasswordChangeException
+     */
+    public function changePassword($email, $previousPassword, $newPassword, $max = UserPasswordChange::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
+    {
+        //first check that the user exists
+        $user = User::findFirst([
+            "email = :email:",
+            'bind' => ['email' => $email]
+        ]);
+
+        if ($user == false) {
+            throw new PasswordChangeException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+        $this->id = $user->id;
+
+        //validate password
+        if (!Utils::verifyPassword($previousPassword, $user->password)) {
+            throw new PasswordChangeException(ErrorMessages::OLD_PASSWORD_INVALID);
+        }
+
+        //check if new password matches user's current password
+        if (Utils::verifyPassword($newPassword, $user->password)) {
+            throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
+        }
+
+        /*
+         * check if the new password does not correspond to the previous max passwords
+         * We use max-1 in the query because we are assuming that the user's current password is
+         * inclusive of the last max passwords used and this has already been checked above
+         */
+        $recentPasswords = UserPasswordChange::query()
+            ->where("user_id = :user_id:")
+            ->bind(["user_id" => $this->id])
+            ->orderBy("date_changed DESC")
+            ->limit($max - 1)
+            ->execute()
+            ->toArray();
+
+        foreach ($recentPasswords as $aRecentPassword) {
+            if (Utils::verifyPassword($newPassword, $aRecentPassword['password_hash'])) {
+                throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
+            }
+        }
+
+        //if all goes well, proceed to update the password
+        return $this->updatePassword($previousPassword, $newPassword);
     }
 
     /**
      * @param string $previousPassword
      * @param string $newPassword
-     * @param int $max the maximum number of changes before a password can be re-used
      * @return bool
+     * @throws PasswordChangeException
      */
-    public function changePassword($previousPassword, $newPassword, $max = UserPasswordChange::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
+    public function updatePassword($previousPassword, $newPassword)
     {
-        return UserPasswordChange::changePassword($previousPassword, $newPassword, $max);
+        $transactionManager = new TransactionManager();
+        try {
+            //use a transaction as we would be updating more than one table
+            $transaction = $transactionManager->get();
+            $this->setTransaction($transaction);
+            $user = User::findFirst($this->id);
+            $user->password = Utils::encryptPassword($newPassword);
+            if (!$user->save()) {
+                $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED);
+            }
+
+            $userPasswordChange = new UserPasswordChange();
+            $userPasswordChange->setTransaction($transaction);
+            $userPasswordChange->setDateChanged(date("Y-m-d H:i:s"));
+            $userPasswordChange->setUserId($this->id);
+            $userPasswordChange->setPasswordHash(Utils::encryptPassword($previousPassword));
+            if (!$userPasswordChange->save()) {
+                $msg = "";
+                foreach ($userPasswordChange->getMessages() as $m) {
+                    $msg .= $m . "::";
+                }
+                $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED . $msg . $this->id . "tega");
+            }
+
+            $transaction->commit();
+            return true;
+        } catch (TransactionFailed $e) {
+            //return false;
+            throw new PasswordChangeException($e->getMessage());
+        }
     }
 
 }

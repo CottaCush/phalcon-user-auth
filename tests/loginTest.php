@@ -19,21 +19,13 @@ class LoginTest extends \UnitTestCase
 
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
+        $this->clearTables();
         //Create a new user
         $response = (new User())->createUser($this->valid_test_email, $this->valid_test_password);
         if (empty($response)) {
             die("Set up failed for login test");
         }
         parent::setUp(Di::getDefault());
-    }
-
-
-    /**
-     * Delete all user's in the table
-     */
-    public function tearDown()
-    {
-        $this->clearTables();
     }
 
     public function testLogin()
@@ -68,7 +60,7 @@ class LoginTest extends \UnitTestCase
             //if it executes this point, print a message to say that test has failed
             $this->fail("Exception was not thrown on email " . $this->email . " and password " . $this->password);
         } catch (Exception $e) {
-            $this->assertInstanceOf('UserAuth\Exceptions\InvalidUserCredentialsException',$e);
+            $this->assertInstanceOf('UserAuth\Exceptions\InvalidUserCredentialsException', $e);
         }
     }
 

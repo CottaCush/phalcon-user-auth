@@ -46,17 +46,6 @@ class UserPasswordChange extends Model
     }
 
     /**
-     * @param string $previousPassword
-     * @param string $newPassword
-     * @param int $max the maximum number of changes before a password can be re-used
-     * @return bool
-     */
-    public static function changePassword($previousPassword, $newPassword, $max = self::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
-    {
-        return true;
-    }
-
-    /**
      * Get ID
      * @return int
      */
@@ -75,6 +64,15 @@ class UserPasswordChange extends Model
     }
 
     /**
+     * Set user ID
+     * @param $userId
+     */
+    public function setUserId($userId)
+    {
+        $this->user_id = $userId;
+    }
+
+    /**
      * Get the date password change was made
      * @return string
      */
@@ -84,12 +82,30 @@ class UserPasswordChange extends Model
     }
 
     /**
+     * Set date changed
+     * @param $dateChanged
+     */
+    public function setDateChanged($dateChanged)
+    {
+        $this->date_changed = $dateChanged;
+    }
+
+    /**
      * Get password hash
      * @return string
      */
     public function getPasswordHash()
     {
         return $this->password_hash;
+    }
+
+    /**
+     * Set Password Hash
+     * @param $passwordHash
+     */
+    public function setPasswordHash($passwordHash)
+    {
+        $this->password_hash = $passwordHash;
     }
 
 }

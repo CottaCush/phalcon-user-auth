@@ -11,7 +11,7 @@ CREATE TABLE `user_credentials` (
 
 
 CREATE TABLE `user_password_changes` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `date_changed` datetime NOT NULL,
   `password_hash` varchar(100) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE `user_password_changes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `user_password_resets` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `token` varchar(200) NOT NULL,
   `date_requested` int(11) NOT NULL,
