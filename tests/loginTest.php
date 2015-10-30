@@ -4,7 +4,7 @@ namespace Tests;
 
 use Phalcon\DI;
 use UserAuth\Models\User;
-
+use \Phalcon\Exception;
 
 /**
  * Test Class for User Login
@@ -36,33 +36,40 @@ class LoginTest extends \UnitTestCase
         $this->clearTables();
     }
 
-
     public function testLogin()
     {
-        //login user without email and password. This should return false
+        //login user without email and password. This should throw an invalid user exception
         $this->email = "";
         $this->password = "";
-        $response = $this->login();
-        $this->assertFalse($response, "Test Login Assertion: empty email and password");
-
+        $this->loginAndCatchInvalidUserException();
 
         //set a valid email, and a wrong password
         $this->email = $this->valid_test_email;
         $this->password = 'incorrect';
-        $response = $this->login();
-        $this->assertFalse($response, "Test Login Assertion: Valid email and invalid password");
+        $this->loginAndCatchInvalidUserException();
 
         //set an invalid email, and a valid password
         $this->email = 'invalid_email@yahoo.com';
         $this->password = $this->valid_test_password;
-        $response = $this->login();
-        $this->assertFalse($response, "Test Login Assertion: Invalid email and valid password");
+        $this->loginAndCatchInvalidUserException();
 
         //Use valid credentials
         $this->email = $this->valid_test_email;
         $this->password = $this->valid_test_password;
         $response = $this->login();
         $this->assertNotFalse($response, "Test Login Assertion: Valid email and valid password");
+    }
+
+
+    public function loginAndCatchInvalidUserException()
+    {
+        try {
+            $this->login();
+            //if it executes this point, print a message to say that test has failed
+            $this->fail("Exception was not thrown on email " . $this->email . " and password " . $this->password);
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\InvalidUserCredentialsException',$e);
+        }
     }
 
     /**
