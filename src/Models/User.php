@@ -281,11 +281,7 @@ class User extends Model
             $userPasswordChange->setUserId($this->id);
             $userPasswordChange->setPasswordHash(Utils::encryptPassword($previousPassword));
             if (!$userPasswordChange->save()) {
-                $msg = "";
-                foreach ($userPasswordChange->getMessages() as $m) {
-                    $msg .= $m . "::";
-                }
-                $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED . $msg . $this->id . "tega");
+                $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED);
             }
 
             $transaction->commit();
