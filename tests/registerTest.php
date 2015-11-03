@@ -3,6 +3,7 @@
 namespace Tests;
 
 use Phalcon\DI;
+use Phalcon\Exception;
 use UserAuth\Models\User;
 
 /**
@@ -12,47 +13,40 @@ use UserAuth\Models\User;
  */
 class RegisterTest extends \UnitTestCase
 {
-
     private $email;
     private $password;
 
-    /**
-     * Delete all user's in the table
-     */
-    public function tearDown()
+    public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
+        parent::setUp(Di::getDefault());
     }
-
 
     public function testRegistration()
     {
         //create user without email and password. This should return false
         $this->email = "";
         $this->password = "";
-        $response = $this->register();
-        $this->assertFalse($response);
+        $this->registerAndCatchUserCreationException();
 
         //set invalid email, and set a password
         $this->email = "abc@y";
-        $response = $this->register();
-        $this->assertFalse($response);
+        $this->registerAndCatchUserCreationException();
 
 
         //set a valid email, and a password
-        $this->email = 'test123@yahoo.com';
-        $this->password = 'test';
+        $this->email = $this->valid_test_email;
+        $this->password = $this->valid_test_password;
         $response = $this->register();
         $this->assertNotFalse($response);
 
         //create another user
-        $this->email = 'test1234@yahoo.com';
+        $this->email = 'ptega@mailinator.com';
         $response = $this->register();
         $this->assertNotFalse($response);
 
         //try to create the same user again, should fail because of email uniqueness validator
-        $response = $this->register();
-        $this->assertFalse($response);
+        $this->registerAndCatchUserCreationException();
 
 
         //check the number of users in the Database, this should equal to 2
@@ -68,5 +62,16 @@ class RegisterTest extends \UnitTestCase
     {
         $user = new User();
         return $user->createUser($this->email, $this->password);
+    }
+
+    public function registerAndCatchUserCreationException()
+    {
+        try {
+            $this->register();
+            //if it executes this point, print a message to say that test has failed
+            $this->fail("Exception was not thrown on registration for email " . $this->email . " and password " . $this->password);
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\UserCreationException', $e);
+        }
     }
 }

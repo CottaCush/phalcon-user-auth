@@ -6,7 +6,7 @@ use UserAuth\Models\User;
 
 abstract class UnitTestCase extends PhalconTestCase
 {
-    protected $valid_test_email = 'test123@yahoo.com';
+    protected $valid_test_email = 'tegap@mailinator.com';
     protected $valid_test_password = 'test';
 
     /**
