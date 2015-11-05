@@ -19,5 +19,13 @@ class ErrorMessages
 
     const UNKNOWN_ERROR_OCCURRED = "Unknown error occurred";
 
-    const PASSWORD_UPDATE_FAILED = "Password Update Failed!";
+    const PASSWORD_UPDATE_FAILED = "Password update Failed!";
+
+    const INACTIVE_ACCOUNT = "User account is inactive";
+
+    const DISABLED_ACCOUNT = "User account is disabled";
+
+    const INVALID_STATUS = "The status provided is invalid";
+
+    const STATUS_UPDATE_FAILED = "Status update failed";
 }
