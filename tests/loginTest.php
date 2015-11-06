@@ -55,7 +55,9 @@ class LoginTest extends \UnitTestCase
         $this->assertNotFalse($response, "Test Login Assertion: Valid email and valid password");
     }
 
-
+    /**
+     * This method must throw and exception when called for the test to Pass
+     */
     public function loginAndCatchAuthenticationException()
     {
         try {

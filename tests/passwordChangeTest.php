@@ -14,9 +14,6 @@ use UserAuth\Models\UserPasswordChange;
  */
 class PasswordChangeTest extends \UnitTestCase
 {
-    protected $user_id;
-    protected $user_id_2;
-
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();

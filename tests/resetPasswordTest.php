@@ -30,7 +30,9 @@ class ResetPasswordTest extends \UnitTestCase
 
     public function testTokenGeneration()
     {
-        echo $this->user_id . PHP_EOL;
+        //test 1 check if generating token for an inactive user account will throw an exception
+        $this->resetPasswordException();
+
         $this->assertEquals(1, 1);
     }
 
@@ -41,8 +43,8 @@ class ResetPasswordTest extends \UnitTestCase
     {
         $user = new User();
         try {
-            $user->changePassword($this->valid_test_email_2, $this->valid_test_password, User::generateRandomPassword());
-            $this->fail("Password changed successfully even when it is an inactive account");
+            $user->generateResetPasswordToken($this->valid_test_email_2);
+            $this->fail("Token generated successfully even when the account is an inactive one");
         } catch (Exception $e) {
             $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
         }

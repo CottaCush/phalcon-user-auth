@@ -199,13 +199,7 @@ class User extends Model
             throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
 
-        if ($user->status == self::STATUS_INACTIVE) {
-            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
-        }
-
-        if ($user->status == self::STATUS_DISABLED) {
-            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
-        }
+        $this->validateStatus($user->status);
 
         return true;
     }
@@ -242,32 +236,11 @@ class User extends Model
             throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
         }
 
-        if ($user->status == self::STATUS_INACTIVE) {
-            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
-        }
+        //check user's status
+        $this->validateStatus($user->status);
 
-        if ($user->status == self::STATUS_DISABLED) {
-            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
-        }
-
-        /*
-         * check if the new password does not correspond to the previous max passwords
-         * We use max-1 in the query because we are assuming that the user's current password is
-         * inclusive of the last max passwords used and this has already been checked above
-         */
-        $recentPasswords = UserPasswordChange::query()
-            ->where("user_id = :user_id:")
-            ->bind(["user_id" => $this->id])
-            ->orderBy("date_changed DESC")
-            ->limit($max - 1)
-            ->execute()
-            ->toArray();
-
-        foreach ($recentPasswords as $aRecentPassword) {
-            if (Utils::verifyPassword($newPassword, $aRecentPassword['password_hash'])) {
-                throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
-            }
-        }
+        //Validate new password
+        UserPasswordChange::validateNewPassword($this->id, $newPassword, $max);
 
         //if all goes well, proceed to update the password
         return $this->updatePassword($previousPassword, $newPassword);
@@ -405,6 +378,22 @@ class User extends Model
     public function generateResetPasswordToken($email, $tokenLength = UserPasswordReset::DEFAULT_TOKEN_LENGTH)
     {
 
+    }
+
+    /**
+     * Validates a user's status before taking further actions e.g login, password change, password reset
+     * @param string $status
+     * @throws UserAuthenticationException
+     */
+    public function validateStatus($status)
+    {
+        if ($status == self::STATUS_INACTIVE) {
+            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
+        }
+
+        if ($status == self::STATUS_DISABLED) {
+            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
+        }
     }
 
 }

@@ -88,6 +88,10 @@ abstract class UnitTestCase extends PhalconTestCase
     {
     }
 
+    /**
+     * Create two new users that will be used for tests
+     * @throws \UserAuth\Exceptions\UserCreationException
+     */
     public function createUsers()
     {
         //Create two new users, one account active and one account inactive
