@@ -47,4 +47,5 @@ run `composer update`
 
 
 Step 2
-Run the SQL in /schema/schema.sql (This will be managed later using Phinx)
+Run DB migrations using Phinx from the root of your project like this like this
+`php vendor/bin/phinx migrate`
