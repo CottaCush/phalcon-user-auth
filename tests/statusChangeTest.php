@@ -15,10 +15,10 @@ class statusChangeTest extends \UnitTestCase
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
-        //Create two new users one account active, one account inactive
-        $response1 = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
+        //Create 1 new user with an active account
+        $response = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
 
-        if (empty($response1)) {
+        if (empty($response)) {
             die("Set up failed for login test");
         }
         parent::setUp(Di::getDefault());
