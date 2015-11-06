@@ -25,7 +25,7 @@ class PasswordChangeTest extends \UnitTestCase
         $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
         $this->user_id_2 = (new User())->createUser($this->valid_test_email_2, $this->valid_test_password, false);
 
-        if (empty($this->user_id)) {
+        if (empty($this->user_id) || empty($this->user_id_2)) {
             die("Set up failed for Password Change Test");
         }
         parent::setUp(Di::getDefault());
