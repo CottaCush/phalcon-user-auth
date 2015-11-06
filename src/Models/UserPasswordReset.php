@@ -12,6 +12,11 @@ use Phalcon\Mvc\Model;
 
 class UserPasswordReset extends Model
 {
+
+    const DEFAULT_TOKEN_LENGTH = 30;
+
+    const MAX_TOKEN_LENGTH = 200;
+
     /**
      * Table for managing model
      * @return string

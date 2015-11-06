@@ -20,11 +20,9 @@ class LoginTest extends \UnitTestCase
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
-        //Create a new user
-        $response = (new User())->createUser($this->valid_test_email, $this->valid_test_password);
-        if (empty($response)) {
-            die("Set up failed for login test");
-        }
+
+        $this->createUsers();
+
         parent::setUp(Di::getDefault());
     }
 

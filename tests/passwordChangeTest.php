@@ -14,17 +14,12 @@ use UserAuth\Models\UserPasswordChange;
  */
 class PasswordChangeTest extends \UnitTestCase
 {
-    protected $user_id;
-
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
 
-        //Create a new user
-        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password);
-        if (empty($this->user_id)) {
-            die("Set up failed for Password Change Test");
-        }
+        $this->createUsers();
+
         parent::setUp(Di::getDefault());
     }
 

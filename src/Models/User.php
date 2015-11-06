@@ -292,4 +292,10 @@ class User extends Model
         }
     }
 
+
+    public function generateResetPasswordToken($email, $tokenLength = UserPasswordReset::DEFAULT_TOKEN_LENGTH)
+    {
+
+    }
+
 }
