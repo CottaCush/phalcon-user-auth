@@ -25,7 +25,9 @@ Step 1
 Create a testDB , e.g. myphalcondb_test
 
 Step 2
-Execute the SQL in the schema directory of the project's root
+Update the phinx configuration file phinx.yml and set the development DB to be your test DB
+Run DB migrations using Phinx from the root of your project like this like this
+`php vendor/bin/phinx migrate`
 
 Running Tests
 -------------
