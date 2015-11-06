@@ -8,7 +8,8 @@ use Phalcon\Mvc\Model\Transaction\Failed as TransactionFailed;
 use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
 use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
 use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
-use UserAuth\Exceptions\InvalidUserCredentialsException;
+use UserAuth\Exceptions\StatusChangeException;
+use UserAuth\Exceptions\UserAuthenticationException;
 use UserAuth\Exceptions\PasswordChangeException;
 use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
@@ -22,7 +23,7 @@ use UserAuth\Libraries\Utils;
 class User extends Model
 {
     /**
-     * Constant to show that a user's account is not yet active
+     * Constant to show that a user's account is not yet active (status after registration)
      */
     const STATUS_INACTIVE = 0;
 
@@ -33,14 +34,14 @@ class User extends Model
 
     /**
      * Constant to show that a user's account has been suspended/disabled
+     * This is a status that is triggered by an administrator
      */
-    const STATUS_SUSPENDED = 2;
-
+    const STATUS_DISABLED = 2;
 
     static $statusMap = [
         self::STATUS_INACTIVE => 'Inactive',
         self::STATUS_ACTIVE => 'Active',
-        self::STATUS_SUSPENDED => 'Suspended'
+        self::STATUS_DISABLED => 'Disabled'
     ];
 
     /**
@@ -180,7 +181,7 @@ class User extends Model
      * @param string $email
      * @param string $password
      * @return bool
-     * @throws InvalidUserCredentialsException
+     * @throws UserAuthenticationException
      */
     public function authenticate($email, $password)
     {
@@ -190,12 +191,20 @@ class User extends Model
         ]);
 
         if ($user == false) {
-            throw new InvalidUserCredentialsException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
+            throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
 
         //validate password
         if (!Utils::verifyPassword($password, $user->password)) {
-            throw new InvalidUserCredentialsException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
+            throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
+        }
+
+        if ($user->status == self::STATUS_INACTIVE) {
+            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
+        }
+
+        if ($user->status == self::STATUS_DISABLED) {
+            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
         }
 
         return true;
@@ -207,7 +216,7 @@ class User extends Model
      * @param string $newPassword
      * @param int $max the maximum number of changes before a password can be re-used
      * @return bool
-     * @throws InvalidUserCredentialsException
+     * @throws UserAuthenticationException
      * @throws PasswordChangeException
      */
     public function changePassword($email, $previousPassword, $newPassword, $max = UserPasswordChange::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
@@ -231,6 +240,14 @@ class User extends Model
         //check if new password matches user's current password
         if (Utils::verifyPassword($newPassword, $user->password)) {
             throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
+        }
+
+        if ($user->status == self::STATUS_INACTIVE) {
+            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
+        }
+
+        if ($user->status == self::STATUS_DISABLED) {
+            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
         }
 
         /*
@@ -287,9 +304,101 @@ class User extends Model
             $transaction->commit();
             return true;
         } catch (TransactionFailed $e) {
-            //return false;
             throw new PasswordChangeException($e->getMessage());
         }
+    }
+
+    /**
+     * Set a user's account status to active
+     * @param string $email
+     * @return bool
+     * @throws StatusChangeException
+     */
+    public function setActive($email)
+    {
+        return $this->changeUserStatus($email, self::STATUS_ACTIVE);
+    }
+
+    /**
+     * Set a user's account status to inactive
+     * @param string $email
+     * @return bool
+     * @throws StatusChangeException
+     */
+    public function setInactive($email)
+    {
+        return $this->changeUserStatus($email, self::STATUS_INACTIVE);
+    }
+
+    /**
+     * Set a user's account status to disabled
+     * @param string $email
+     * @return bool
+     * @throws StatusChangeException
+     */
+    public function disableUser($email)
+    {
+        return $this->changeUserStatus($email, self::STATUS_DISABLED);
+    }
+
+    /**
+     * Change a user's status
+     * @param string $email
+     * @param int $newStatus
+     * @return bool
+     * @throws StatusChangeException
+     */
+    public function changeUserStatus($email, $newStatus)
+    {
+        $user = $this->getUserByEmail($email);
+        if (empty($user)) {
+            throw new StatusChangeException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+
+        if (!array_key_exists($newStatus, self::$statusMap)) {
+            throw new StatusChangeException(ErrorMessages::INVALID_STATUS);
+        }
+
+        if ($user->status == $newStatus) {
+            throw new StatusChangeException("User status is already set to " . self::getStatusDescriptionFromCode($newStatus));
+        }
+
+        //all is fine
+        $user = User::findFirst($this->id);
+        $user->status = (int) $newStatus;
+        if (!$user->save()) {
+            throw new StatusChangeException(ErrorMessages::STATUS_UPDATE_FAILED);
+        }
+
+        return true;
+    }
+
+    /**
+     * Get user details
+     * @param string $email
+     * @return Model
+     */
+
+    public function getUserByEmail($email)
+    {
+        return User::findFirst([
+            "email = :email:",
+            'bind' => ['email' => $email]
+        ]);
+    }
+
+    /**
+     * Get a meaningful textual description of a user's status using the status code
+     * @param $statusCode
+     * @return string
+     */
+    public static function getStatusDescriptionFromCode($statusCode)
+    {
+        if (empty(self::$statusMap[$statusCode])) {
+            return "Unknown";
+        }
+
+        return self::$statusMap[$statusCode];
     }
 
 

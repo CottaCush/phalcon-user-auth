@@ -10,10 +10,10 @@ use \Phalcon\Exception;
  * Test Class for User Login
  * Class loginTest
  * @package Tests
+ * @author Tega Oghenekohwo <tega@cottacush.com>
  */
 class LoginTest extends \UnitTestCase
 {
-
     private $email;
     private $password;
 
@@ -31,19 +31,24 @@ class LoginTest extends \UnitTestCase
         //login user without email and password. This should throw an invalid user exception
         $this->email = "";
         $this->password = "";
-        $this->loginAndCatchInvalidUserException();
+        $this->loginAndCatchAuthenticationException();
 
         //set a valid email, and a wrong password
         $this->email = $this->valid_test_email;
         $this->password = 'incorrect';
-        $this->loginAndCatchInvalidUserException();
+        $this->loginAndCatchAuthenticationException();
 
         //set an invalid email, and a valid password
         $this->email = 'invalid_email@yahoo.com';
         $this->password = $this->valid_test_password;
-        $this->loginAndCatchInvalidUserException();
+        $this->loginAndCatchAuthenticationException();
 
-        //Use valid credentials
+        //Use valid credentials but an account that is inactive
+        $this->email = $this->valid_test_email_2;
+        $this->password = $this->valid_test_password;
+        $this->loginAndCatchAuthenticationException();
+
+        //Use valid credentials and an account that is active
         $this->email = $this->valid_test_email;
         $this->password = $this->valid_test_password;
         $response = $this->login();
@@ -51,14 +56,14 @@ class LoginTest extends \UnitTestCase
     }
 
 
-    public function loginAndCatchInvalidUserException()
+    public function loginAndCatchAuthenticationException()
     {
         try {
             $this->login();
             //if it executes this point, print a message to say that test has failed
             $this->fail("Exception was not thrown on email " . $this->email . " and password " . $this->password);
         } catch (Exception $e) {
-            $this->assertInstanceOf('UserAuth\Exceptions\InvalidUserCredentialsException', $e);
+            $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
         }
     }
 

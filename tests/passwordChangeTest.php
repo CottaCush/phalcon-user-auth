@@ -14,6 +14,9 @@ use UserAuth\Models\UserPasswordChange;
  */
 class PasswordChangeTest extends \UnitTestCase
 {
+    protected $user_id;
+    protected $user_id_2;
+
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
@@ -91,5 +94,13 @@ class PasswordChangeTest extends \UnitTestCase
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);
         $this->assertTrue($response);
+
+        //finally , try to change the password of a user that has an inactive account
+        try {
+            $user->changePassword($this->valid_test_email_2, $this->valid_test_password, User::generateRandomPassword());
+            $this->fail("Password changed successfully even when it is an inactive account");
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
+        }
     }
 }
