@@ -3,11 +3,11 @@
 namespace UserAuth\Exceptions;
 
 /**
- * Class InvalidUserCredentialsException
+ * Class StatusChangeException
  * @package UserAuth\Exceptions
  * @author Tega Oghenekohwo <tega@cottacush.com>
  */
-class InvalidUserCredentialsException extends \Phalcon\Exception
+class StatusChangeException extends \Phalcon\Exception
 {
 
 }

@@ -15,14 +15,17 @@ use UserAuth\Models\UserPasswordChange;
 class PasswordChangeTest extends \UnitTestCase
 {
     protected $user_id;
+    protected $user_id_2;
 
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
 
-        //Create a new user
-        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password);
-        if (empty($this->user_id)) {
+        //Create two new users, one account active and one account inactive
+        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
+        $this->user_id_2 = (new User())->createUser($this->valid_test_email_2, $this->valid_test_password, false);
+
+        if (empty($this->user_id) || empty($this->user_id_2)) {
             die("Set up failed for Password Change Test");
         }
         parent::setUp(Di::getDefault());
@@ -96,5 +99,13 @@ class PasswordChangeTest extends \UnitTestCase
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);
         $this->assertTrue($response);
+
+        //finally , try to change the password of a user that has an inactive account
+        try {
+            $user->changePassword($this->valid_test_email_2, $this->valid_test_password, User::generateRandomPassword());
+            $this->fail("Password changed successfully even when it is an inactive account");
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
+        }
     }
 }
