@@ -11,6 +11,7 @@ use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
 use UserAuth\Exceptions\StatusChangeException;
 use UserAuth\Exceptions\UserAuthenticationException;
 use UserAuth\Exceptions\PasswordChangeException;
+use UserAuth\Exceptions\ResetPasswordException;
 use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
 
@@ -45,7 +46,7 @@ class User extends Model
     ];
 
     /**
-     * @var integer
+     * @var int
      */
     protected $id;
 
@@ -374,10 +375,25 @@ class User extends Model
         return self::$statusMap[$statusCode];
     }
 
-
-    public function generateResetPasswordToken($email, $tokenLength = UserPasswordReset::DEFAULT_TOKEN_LENGTH)
+    /**
+     * @param string $email
+     * @param int $tokenLength
+     * @param int $expiry the
+     * @return string returns the token generated
+     * @throws ResetPasswordException
+     * @throws UserAuthenticationException
+     */
+    public function generateResetPasswordToken($email, $tokenLength = UserPasswordReset::DEFAULT_TOKEN_LENGTH, $expiry = UserPasswordReset::DEFAULT_TOKEN_EXPIRY_TIME)
     {
+        $user = $this->getUserByEmail($email);
 
+        if (empty($user)) {
+            throw new ResetPasswordException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+
+        $this->validateStatus($user->status);
+
+        return (new UserPasswordReset())->generateToken($user->toArray()['id'], $tokenLength, $expiry);
     }
 
     /**

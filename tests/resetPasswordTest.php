@@ -11,6 +11,7 @@ namespace Tests;
 use Phalcon\DI;
 use UserAuth\Models\User;
 use \Phalcon\Exception;
+use UserAuth\Models\UserPasswordReset;
 
 /**
  * Class ResetPasswordTest
@@ -30,10 +31,13 @@ class ResetPasswordTest extends \UnitTestCase
 
     public function testTokenGeneration()
     {
+        $user = new User();
         //test 1 check if generating token for an inactive user account will throw an exception
         $this->resetPasswordException();
 
-        $this->assertEquals(1, 1);
+        $token = $user->generateResetPasswordToken($this->valid_test_email);
+
+        $this->assertEquals(strlen($token), UserPasswordReset::DEFAULT_TOKEN_LENGTH);
     }
 
     /**

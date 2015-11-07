@@ -19,7 +19,7 @@ class ErrorMessages
 
     const UNKNOWN_ERROR_OCCURRED = "Unknown error occurred";
 
-    const PASSWORD_UPDATE_FAILED = "Password update Failed!";
+    const PASSWORD_UPDATE_FAILED = "Password update failed!";
 
     const INACTIVE_ACCOUNT = "User account is inactive";
 
@@ -28,4 +28,8 @@ class ErrorMessages
     const INVALID_STATUS = "The status provided is invalid";
 
     const STATUS_UPDATE_FAILED = "Status update failed";
+
+    const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds 200 characters";
+
+    const RESET_PASSWORD_FAILED = "Password reset failed.";
 }
