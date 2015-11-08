@@ -8,6 +8,6 @@ return new Config([
         'host' => '127.0.0.1',
         'username' => 'root',
         'password' => '',
-        'dbname' => 'myphalcondb_test'
+        'dbname' => 'user_auth_db'
     ],
 ]);
