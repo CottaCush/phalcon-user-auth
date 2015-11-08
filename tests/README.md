@@ -22,7 +22,7 @@ Requirements
 Installation
 ------------
 Step 1
-Create a testDB , e.g. myphalcondb_test
+Create a new database named `user_auth_db`
 
 Step 2
 Update the phinx configuration file phinx.yml and set the development DB to be your test DB
