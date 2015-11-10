@@ -1,14 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: tegaoghenekohwo
- * Date: 30/10/15
- * Time: 22:14
- */
 
 namespace UserAuth\Models;
 
-
+/**
+ * Class ErrorMessages
+ * @package UserAuth\Models
+ */
 class ErrorMessages
 {
     const INVALID_AUTHENTICATION_DETAILS = "The email/password combination provided is invalid";
@@ -29,7 +26,9 @@ class ErrorMessages
 
     const STATUS_UPDATE_FAILED = "Status update failed";
 
-    const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds 200 characters";
+    const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds " .UserPasswordReset::MAX_TOKEN_LENGTH. " characters";
+
+    const RESET_PASSWORD_TOKEN_TOO_SHORT = "The reset password token provided is less than " .UserPasswordReset::MIN_TOKEN_LENGTH. " characters";
 
     const RESET_PASSWORD_FAILED = "Password reset failed";
 
