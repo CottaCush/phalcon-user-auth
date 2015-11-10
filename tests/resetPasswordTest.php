@@ -36,15 +36,15 @@ class ResetPasswordTest extends \UnitTestCase
         //check if token generated is actually in database
         $tokenData = (new UserPasswordReset())->getTokenData($token);
         $this->assertNotEmpty($tokenData);
-        $this->assertEquals($this->user_id, $tokenData->user_id);
-        $this->assertEquals(1, $tokenData->expires);
+        $this->assertEquals($this->user_id, $tokenData->getUserId());
+        $this->assertEquals(1, $tokenData->getExpires());
 
         //generate a new token for the valid account and set it to not expire
         $token = $user->generateResetPasswordToken($this->valid_test_email, null, false);
         $tokenData = (new UserPasswordReset())->getTokenData($token);
         $this->assertNotEmpty($tokenData);
-        $this->assertEquals($this->user_id, $tokenData->user_id);
-        $this->assertEquals(0, $tokenData->expires);
+        $this->assertEquals($this->user_id, $tokenData->getUserId());
+        $this->assertEquals(0, $tokenData->getExpires());
     }
 
     public function testResetPassword()
@@ -67,7 +67,7 @@ class ResetPasswordTest extends \UnitTestCase
 
         //authenticate with new password
         $response = $user->authenticate($this->valid_test_email, $newPassword);
-        $this->assertTrue($response);
+        $this->assertNotEmpty($response);
 
         //try to use the same token again even when it has expired
         $this->throwResetPasswordException($token);

@@ -58,7 +58,7 @@ class PasswordChangeTest extends \UnitTestCase
 
             //attempt to login with new password
             $response = $user->authenticate($this->valid_test_email, $newPassword);
-            $this->assertTrue($response);
+            $this->assertNotEmpty($response);
 
             //Set new password to previous password
             $previousPassword = $newPassword;
@@ -82,7 +82,7 @@ class PasswordChangeTest extends \UnitTestCase
         $this->assertTrue($response);
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);
-        $this->assertTrue($response);
+        $this->assertNotEmpty($response);
 
         $previousPassword = $newPassword;
         $newPassword = $passwordsHistory[0];
@@ -90,7 +90,7 @@ class PasswordChangeTest extends \UnitTestCase
         $this->assertTrue($response);
 
         $response = $user->authenticate($this->valid_test_email, $newPassword);
-        $this->assertTrue($response);
+        $this->assertNotEmpty($response);
 
         //finally , try to change the password of a user that has an inactive account
         try {
