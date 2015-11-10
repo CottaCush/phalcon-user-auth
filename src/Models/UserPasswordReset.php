@@ -50,13 +50,6 @@ class UserPasswordReset extends BaseModel
      */
     private $expires;
 
-
-    /**
-     * Array used to temporarily hold token values to avoid repetitive checking of DB for token uniqueness
-     * @var array
-     */
-    private $token_array;
-
     /**
      * The default length of a reset password token
      */
@@ -66,6 +59,11 @@ class UserPasswordReset extends BaseModel
      * The maximum length of a reset password token
      */
     const MAX_TOKEN_LENGTH = 200;
+
+    /**
+     * The minimum length of a reset password token
+     */
+    const MIN_TOKEN_LENGTH = 20;
 
     /**
      * The default token expiry time of a reset password token
@@ -199,14 +197,20 @@ class UserPasswordReset extends BaseModel
      */
     public function generateToken($user_id, $tokenLength, $expires, $expiry)
     {
-        if (strlen($tokenLength) > self::MAX_TOKEN_LENGTH) {
+        if ($tokenLength > self::MAX_TOKEN_LENGTH) {
             throw new ResetPasswordException(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_LONG);
         }
 
+        if ($tokenLength < self::MIN_TOKEN_LENGTH) {
+            throw new ResetPasswordException(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_SHORT);
+        }
+
+        $tokenLength = $tokenLength - 10; //append a timestamp
         $token = Utils::generateRandomString($tokenLength, false);
         if ($this->tokenExists($token)) {
             return $this->generateToken($user_id, $tokenLength, $expires, $expiry);
         }
+        $token = $token . time();
         $this->setUserId($user_id);
         $this->setExpires((int) $expires);
         $this->setDateOfExpiry($expires ? time() + $expiry : null);
@@ -223,7 +227,7 @@ class UserPasswordReset extends BaseModel
     /**
      * Get reset data associated with a token
      * @param $token
-     * @return Model
+     * @return \UserAuth\Models\UserPasswordReset
      */
     public function getTokenData($token)
     {
@@ -240,30 +244,12 @@ class UserPasswordReset extends BaseModel
      */
     private function tokenExists($token)
     {
-        if (empty($this->token_array)) {
-            $this->token_array = $this->getCurrentTokens();
+        $tokenData = $this->getTokenData($token);
+        if ($tokenData == false) {
+            return false;
         }
 
-        if (in_array($token, $this->token_array)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Return all tokens in database table
-     * @return array
-     */
-    public function getCurrentTokens()
-    {
-        $result = [];
-        $data = (new UserPasswordReset())->fetchAllTableDataByChunks();
-        foreach ($data as $row) {
-            $result[] = $row['token'];
-        }
-
-        return $result;
+        return $tokenData == false ? true : false;
     }
 
     /**

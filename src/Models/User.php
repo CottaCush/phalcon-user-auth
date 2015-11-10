@@ -46,6 +46,7 @@ class User extends BaseModel
     ];
 
     /**
+     * @property
      * @var int
      */
     protected $id;
@@ -353,7 +354,7 @@ class User extends BaseModel
     /**
      * Get user details
      * @param string $email
-     * @return Model
+     * @return \UserAuth\Models\User
      */
 
     public function getUserByEmail($email)
@@ -400,7 +401,7 @@ class User extends BaseModel
         $tokenLength = is_null($tokenLength) ? UserPasswordReset::DEFAULT_TOKEN_LENGTH : (int) $tokenLength;
         $expiry = is_null($expiry) ? UserPasswordReset::DEFAULT_TOKEN_EXPIRY_TIME : (int) $expiry;
 
-        return (new UserPasswordReset())->generateToken($user->toArray()['id'], $tokenLength, $expires, $expiry);
+        return (new UserPasswordReset())->generateToken($user->id, $tokenLength, $expires, $expiry);
     }
 
     /**
