@@ -244,7 +244,7 @@ class User extends BaseModel
     /**
      * @param int $userId
      * @param string $newPassword
-     * @param null $resetPasswordToken token to expire of call is from password reset
+     * @param null $resetPasswordToken token to expire if call is from password reset
      * @return bool
      * @throws PasswordChangeException
      */
