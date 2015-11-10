@@ -4,7 +4,7 @@
   "keywords": ["phalcon", "library", "user", "auth", "login"],
   "homepage": "https://bitbucket.org/cottacush/user-auth#readme",
   "type": "library",
-  "version" : "1.0.0",
+  "version" : "1.1.0",
   "authors": [
     {
       "name": "Tega Oghenekohwo",
