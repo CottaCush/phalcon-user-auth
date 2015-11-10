@@ -10,10 +10,9 @@ namespace UserAuth\Models;
 
 use Phalcon\Mvc\Model;
 use UserAuth\Exceptions\ResetPasswordException;
-use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
 
-class UserPasswordReset extends Model
+class UserPasswordReset extends BaseModel
 {
     /**
      * Primary key of the model
@@ -44,6 +43,19 @@ class UserPasswordReset extends Model
      * @var int
      */
     private $date_of_expiry;
+
+    /**
+     * Value to check if a token should expire or not
+     * @var bool
+     */
+    private $expires;
+
+
+    /**
+     * Array used to temporarily hold token values to avoid repetitive checking of DB for token uniqueness
+     * @var array
+     */
+    private $token_array;
 
     /**
      * The default length of a reset password token
@@ -151,6 +163,24 @@ class UserPasswordReset extends Model
     }
 
     /**
+     * Set whether or not a token should expired
+     * @param $expires
+     */
+    public function setExpires($expires)
+    {
+        $this->expires  = $expires;
+    }
+
+    /**
+     * Get whether or not a token will expire
+     * @return bool
+     */
+    public function getExpires()
+    {
+        return $this->expires;
+    }
+
+    /**
      * Table for managing model
      * @return string
      */
@@ -160,21 +190,26 @@ class UserPasswordReset extends Model
     }
 
     /**
-     * @param $user_id
+     * @param int $user_id
      * @param int $tokenLength
-     * @param int $expiry
+     * @param int $expires
+     * @param boolean $expiry
      * @return string
      * @throws ResetPasswordException
      */
-    public function generateToken($user_id, $tokenLength = self::DEFAULT_TOKEN_LENGTH, $expiry = self::DEFAULT_TOKEN_EXPIRY_TIME)
+    public function generateToken($user_id, $tokenLength, $expires, $expiry)
     {
         if (strlen($tokenLength) > self::MAX_TOKEN_LENGTH) {
             throw new ResetPasswordException(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_LONG);
         }
 
         $token = Utils::generateRandomString($tokenLength, false);
+        if ($this->tokenExists($token)) {
+            return $this->generateToken($user_id, $tokenLength, $expires, $expiry);
+        }
         $this->setUserId($user_id);
-        $this->setDateOfExpiry(time() + $expiry);
+        $this->setExpires((int) $expires);
+        $this->setDateOfExpiry($expires ? time() + $expiry : null);
         $this->setToken($token);
         $this->setDateRequested(date("Y-m-d H:i:s"));
 
@@ -183,6 +218,68 @@ class UserPasswordReset extends Model
         }
 
         return $token;
+    }
+
+    /**
+     * Get reset data associated with a token
+     * @param $token
+     * @return Model
+     */
+    public function getTokenData($token)
+    {
+        return $this->findFirst([
+            "token = :token:",
+            'bind' => ['token' => $token]
+        ]);
+    }
+
+    /**
+     * Check if a token already exists
+     * @param string $token
+     * @return bool
+     */
+    private function tokenExists($token)
+    {
+        if (empty($this->token_array)) {
+            $this->token_array = $this->getCurrentTokens();
+        }
+
+        if (in_array($token, $this->token_array)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Return all tokens in database table
+     * @return array
+     */
+    public function getCurrentTokens()
+    {
+        $result = [];
+        $data = (new UserPasswordReset())->fetchAllTableDataByChunks();
+        foreach ($data as $row) {
+            $result[] = $row['token'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Expire a token
+     * @param string $token
+     * @return bool
+     */
+    public function expireToken($token)
+    {
+        $tokenData = $this->getTokenData($token);
+        if ($tokenData == false) {
+            return false;
+        }
+
+        $tokenData->date_of_expiry = time() - 1;
+        return $tokenData->save();
     }
 
 }

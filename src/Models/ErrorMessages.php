@@ -31,5 +31,11 @@ class ErrorMessages
 
     const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds 200 characters";
 
-    const RESET_PASSWORD_FAILED = "Password reset failed.";
+    const RESET_PASSWORD_FAILED = "Password reset failed";
+
+    const INVALID_RESET_PASSWORD_TOKEN = "The token specified is invalid";
+
+    const EXPIRED_RESET_PASSWORD_TOKEN = "The token specified has expired";
+
+    const TOKEN_EXPIRY_FAILED = "The token could not be expired";
 }

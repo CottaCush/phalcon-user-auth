@@ -11,7 +11,7 @@ use UserAuth\Libraries\Utils;
  * Class UserPasswordChange
  * @package UserAuth\Models
  */
-class UserPasswordChange extends Model
+class UserPasswordChange extends BaseModel
 {
     const MAX_PASSWORD_CHANGES_BEFORE_REUSE = 5;
 
