@@ -52,7 +52,7 @@ class LoginTest extends \UnitTestCase
         $this->email = $this->valid_test_email;
         $this->password = $this->valid_test_password;
         $response = $this->login();
-        $this->assertNotFalse($response, "Test Login Assertion: Valid email and valid password");
+        $this->assertNotEmpty($response, "Test Login Assertion: Valid email and valid password");
     }
 
     /**

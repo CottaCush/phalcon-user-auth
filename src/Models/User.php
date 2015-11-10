@@ -182,7 +182,7 @@ class User extends BaseModel
     /**
      * @param string $email
      * @param string $password
-     * @return bool
+     * @return $this
      * @throws UserAuthenticationException
      */
     public function authenticate($email, $password)
@@ -203,7 +203,7 @@ class User extends BaseModel
 
         $this->validateStatus($user->status);
 
-        return true;
+        return $user;
     }
 
     /**

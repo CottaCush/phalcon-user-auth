@@ -22,6 +22,7 @@ class UserPasswordReset extends BaseModel
 
     /**
      * User ID
+     * @property
      * @var int
      */
     private $user_id;
@@ -46,6 +47,7 @@ class UserPasswordReset extends BaseModel
 
     /**
      * Value to check if a token should expire or not
+     * @property
      * @var bool
      */
     private $expires;
