@@ -4,3 +4,4 @@
 - Added User Password Change Management
 - Added User Status Management-e 
 # [1.1.0](https://bitbucket.org/cottacush/user-auth/src/f785ecc8209b579daaaeae9b3796f1d289d92cfc/?at=1.1.0) (2015-11-10)
+- Updated user login to return user object on success and not a boolean as before 
