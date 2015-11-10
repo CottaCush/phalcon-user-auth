@@ -70,7 +70,7 @@ class UserPasswordReset extends BaseModel
     /**
      * The default token expiry time of a reset password token
      */
-    const DEFAULT_TOKEN_EXPIRY_TIME = 3 * 24 * 3600;
+    const DEFAULT_TOKEN_EXPIRY_TIME = 259200; //3 * 24 * 3600
 
     /**
      * Set the object's ID
@@ -200,11 +200,11 @@ class UserPasswordReset extends BaseModel
     public function generateToken($user_id, $tokenLength, $expires, $expiry)
     {
         if ($tokenLength > self::MAX_TOKEN_LENGTH) {
-            throw new ResetPasswordException(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_LONG);
+            throw new ResetPasswordException(sprintf(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_LONG, UserPasswordReset::MAX_TOKEN_LENGTH));
         }
 
         if ($tokenLength < self::MIN_TOKEN_LENGTH) {
-            throw new ResetPasswordException(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_SHORT);
+            throw new ResetPasswordException(sprintf(ErrorMessages::RESET_PASSWORD_TOKEN_TOO_SHORT, UserPasswordReset::MIN_TOKEN_LENGTH));
         }
 
         $tokenLength = $tokenLength - 10; //append a timestamp
