@@ -182,7 +182,7 @@ class User extends BaseModel
     /**
      * @param string $email
      * @param string $password
-     * @return Model
+     * @return $this
      * @throws UserAuthenticationException
      */
     public function authenticate($email, $password)
