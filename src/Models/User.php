@@ -11,6 +11,7 @@ use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
 use UserAuth\Exceptions\StatusChangeException;
 use UserAuth\Exceptions\UserAuthenticationException;
 use UserAuth\Exceptions\PasswordChangeException;
+use UserAuth\Exceptions\ResetPasswordException;
 use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
 
@@ -20,7 +21,7 @@ use UserAuth\Libraries\Utils;
  * @author Tega Oghenekohwo <tega@cottacush.com>
  * @package UserAuth\models
  */
-class User extends Model
+class User extends BaseModel
 {
     /**
      * Constant to show that a user's account is not yet active (status after registration)
@@ -45,7 +46,8 @@ class User extends Model
     ];
 
     /**
-     * @var integer
+     * @property
+     * @var int
      */
     protected $id;
 
@@ -199,13 +201,7 @@ class User extends Model
             throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
 
-        if ($user->status == self::STATUS_INACTIVE) {
-            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
-        }
-
-        if ($user->status == self::STATUS_DISABLED) {
-            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
-        }
+        $this->validateStatus($user->status);
 
         return true;
     }
@@ -221,16 +217,10 @@ class User extends Model
      */
     public function changePassword($email, $previousPassword, $newPassword, $max = UserPasswordChange::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
     {
-        //first check that the user exists
-        $user = User::findFirst([
-            "email = :email:",
-            'bind' => ['email' => $email]
-        ]);
-
+        $user = $this->getUserByEmail($email);
         if ($user == false) {
             throw new PasswordChangeException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
         }
-        $this->id = $user->id;
 
         //validate password
         if (!Utils::verifyPassword($previousPassword, $user->password)) {
@@ -242,51 +232,35 @@ class User extends Model
             throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
         }
 
-        if ($user->status == self::STATUS_INACTIVE) {
-            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
-        }
+        //check user's status
+        $this->validateStatus($user->status);
 
-        if ($user->status == self::STATUS_DISABLED) {
-            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
-        }
-
-        /*
-         * check if the new password does not correspond to the previous max passwords
-         * We use max-1 in the query because we are assuming that the user's current password is
-         * inclusive of the last max passwords used and this has already been checked above
-         */
-        $recentPasswords = UserPasswordChange::query()
-            ->where("user_id = :user_id:")
-            ->bind(["user_id" => $this->id])
-            ->orderBy("date_changed DESC")
-            ->limit($max - 1)
-            ->execute()
-            ->toArray();
-
-        foreach ($recentPasswords as $aRecentPassword) {
-            if (Utils::verifyPassword($newPassword, $aRecentPassword['password_hash'])) {
-                throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
-            }
-        }
+        //Validate new password
+        UserPasswordChange::validateNewPassword((int) $user->id, $newPassword, $max);
 
         //if all goes well, proceed to update the password
-        return $this->updatePassword($previousPassword, $newPassword);
+        return $this->updatePassword((int) $user->id, $newPassword);
     }
 
     /**
-     * @param string $previousPassword
+     * @param int $userId
      * @param string $newPassword
+     * @param null $resetPasswordToken token to expire if call is from password reset
      * @return bool
      * @throws PasswordChangeException
      */
-    public function updatePassword($previousPassword, $newPassword)
+    public function updatePassword($userId, $newPassword, $resetPasswordToken = null)
     {
         $transactionManager = new TransactionManager();
         try {
             //use a transaction as we would be updating more than one table
             $transaction = $transactionManager->get();
             $this->setTransaction($transaction);
-            $user = User::findFirst($this->id);
+            $user = User::findFirst($userId);
+            if ($user == false) {
+                $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED);
+            }
+            $previousPassword = $user->password;
             $user->password = Utils::encryptPassword($newPassword);
             if (!$user->save()) {
                 $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED);
@@ -295,10 +269,14 @@ class User extends Model
             $userPasswordChange = new UserPasswordChange();
             $userPasswordChange->setTransaction($transaction);
             $userPasswordChange->setDateChanged(date("Y-m-d H:i:s"));
-            $userPasswordChange->setUserId($this->id);
-            $userPasswordChange->setPasswordHash(Utils::encryptPassword($previousPassword));
+            $userPasswordChange->setUserId($userId);
+            $userPasswordChange->setPasswordHash($previousPassword);
             if (!$userPasswordChange->save()) {
                 $transaction->rollback(ErrorMessages::PASSWORD_UPDATE_FAILED);
+            }
+
+            if (!empty($resetPasswordToken) && !(new UserPasswordReset())->expireToken($resetPasswordToken)) {
+                $transaction->rollback(ErrorMessages::TOKEN_EXPIRY_FAILED);
             }
 
             $transaction->commit();
@@ -376,7 +354,7 @@ class User extends Model
     /**
      * Get user details
      * @param string $email
-     * @return Model
+     * @return \UserAuth\Models\User
      */
 
     public function getUserByEmail($email)
@@ -399,6 +377,95 @@ class User extends Model
         }
 
         return self::$statusMap[$statusCode];
+    }
+
+    /**
+     * @param $email
+     * @param null $tokenLength
+     * @param bool|true $expires whether the token expires or not
+     * @param null $expiry amount of time in seconds for the token to expire
+     * @return string
+     * @throws ResetPasswordException
+     * @throws UserAuthenticationException
+     */
+    public function generateResetPasswordToken($email, $tokenLength = null, $expires = true, $expiry = null)
+    {
+        $user = $this->getUserByEmail($email);
+
+        if (empty($user)) {
+            throw new ResetPasswordException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+
+        $this->validateStatus($user->status);
+
+        $tokenLength = is_null($tokenLength) ? UserPasswordReset::DEFAULT_TOKEN_LENGTH : (int) $tokenLength;
+        $expiry = is_null($expiry) ? UserPasswordReset::DEFAULT_TOKEN_EXPIRY_TIME : (int) $expiry;
+
+        return (new UserPasswordReset())->generateToken($user->id, $tokenLength, $expires, $expiry);
+    }
+
+    /**
+     * Validates a user's status before taking further actions e.g login, password change, password reset
+     * @param string $status
+     * @throws UserAuthenticationException
+     */
+    public function validateStatus($status)
+    {
+        if ($status == self::STATUS_INACTIVE) {
+            throw new UserAuthenticationException(ErrorMessages::INACTIVE_ACCOUNT);
+        }
+
+        if ($status == self::STATUS_DISABLED) {
+            throw new UserAuthenticationException(ErrorMessages::DISABLED_ACCOUNT);
+        }
+    }
+
+    /**
+     * Returns the User ID associated with a reset password token
+     * @param $token
+     * @return null|int
+     */
+    public function getUserIdByResetPasswordToken($token)
+    {
+        $tokenData = (new UserPasswordReset())->getTokenData($token);
+        return $tokenData == false ? null : $tokenData->user_id;
+    }
+
+    /**
+     * @param $email
+     * @param $newPassword
+     * @param $token
+     * @return bool
+     * @throws PasswordChangeException
+     * @throws ResetPasswordException
+     * @throws UserAuthenticationException
+     */
+    public function resetPassword($email, $newPassword, $token)
+    {
+        $user = $this->getUserByEmail($email);
+        if ($user == false) {
+            throw new ResetPasswordException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+
+        $this->validateStatus($user->status);
+
+        //check if token is valid
+        $tokenData = (new UserPasswordReset())->getTokenData($token);
+        if (empty($tokenData)) {
+            throw new ResetPasswordException(ErrorMessages::INVALID_RESET_PASSWORD_TOKEN);
+        }
+
+        $expires = (int) $tokenData->expires;
+        if ( $expires=== 1 && time() > $tokenData->date_of_expiry) {
+            throw new ResetPasswordException(ErrorMessages::EXPIRED_RESET_PASSWORD_TOKEN);
+        }
+
+        //proceed to update password
+        if ($expires === 0) {
+            return $this->updatePassword((int) $user->id, $newPassword);
+        }
+
+        return $this->updatePassword((int) $user->id, $newPassword, $token);
     }
 
 }

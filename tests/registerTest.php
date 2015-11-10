@@ -9,6 +9,7 @@ use UserAuth\Models\User;
 /**
  * Test Class for User Registration
  * Class RegisterTest
+ * @author Tega Oghenekohwo <tega@cottacush.com>
  * @package Tests
  */
 class RegisterTest extends \UnitTestCase

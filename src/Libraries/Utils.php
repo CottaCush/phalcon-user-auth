@@ -49,6 +49,16 @@ class Utils
      */
     public static function generateRandomPassword($length = 8, $strict = true)
     {
+        return self::generateRandomString($length, $strict);
+    }
+
+    /**
+     * @param int $length length of the string
+     * @param bool|true $strict whether or not the string should contain a symbol
+     * @return string
+     */
+    public static function generateRandomString($length, $strict = true)
+    {
         $password = Text::random(Text::RANDOM_ALNUM, $length);
 
         if (!$strict) {
@@ -56,7 +66,7 @@ class Utils
         }
 
         //todo may add more symbols later
-        $shuffledSymbols = str_shuffle("@#$%^&*!");
+        $shuffledSymbols = str_shuffle("@#$%^&*!+-_~");
 
         return substr($password, 0, strlen($password) - 1) . $shuffledSymbols[0];
     }

@@ -20,13 +20,9 @@ class LoginTest extends \UnitTestCase
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
-        //Create two new users one account active, one account inactive
-        $response1 = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
-        $response2 = (new User())->createUser($this->valid_test_email_2, $this->valid_test_password, false);
 
-        if (empty($response1) || empty($response2)) {
-            die("Set up failed for login test");
-        }
+        $this->createUsers();
+
         parent::setUp(Di::getDefault());
     }
 
@@ -59,7 +55,9 @@ class LoginTest extends \UnitTestCase
         $this->assertNotFalse($response, "Test Login Assertion: Valid email and valid password");
     }
 
-
+    /**
+     * This method must throw and exception when called for the test to Pass
+     */
     public function loginAndCatchAuthenticationException()
     {
         try {

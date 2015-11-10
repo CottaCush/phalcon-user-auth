@@ -3,13 +3,15 @@
 namespace UserAuth\Models;
 
 use Phalcon\Mvc\Model;
+use UserAuth\Exceptions\PasswordChangeException;
+use UserAuth\Libraries\Utils;
 
 /**
  * Model class for managing user password changes
  * Class UserPasswordChange
  * @package UserAuth\Models
  */
-class UserPasswordChange extends Model
+class UserPasswordChange extends BaseModel
 {
     const MAX_PASSWORD_CHANGES_BEFORE_REUSE = 5;
 
@@ -106,6 +108,33 @@ class UserPasswordChange extends Model
     public function setPasswordHash($passwordHash)
     {
         $this->password_hash = $passwordHash;
+    }
+
+    /**
+     * check if the new password does not correspond to the previous max passwords
+     * We use max-1 in the query because we are assuming that the user's current password is
+     * inclusive of the last max passwords used and this has already been checked above
+     *
+     * @param int $userId
+     * @param string $newPassword
+     * @param int $max
+     * @throws PasswordChangeException
+     */
+    public static function validateNewPassword($userId, $newPassword, $max = self::MAX_PASSWORD_CHANGES_BEFORE_REUSE)
+    {
+        $recentPasswords = UserPasswordChange::query()
+            ->where("user_id = :user_id:")
+            ->bind(["user_id" => $userId])
+            ->orderBy("date_changed DESC")
+            ->limit($max - 1)
+            ->execute()
+            ->toArray();
+
+        foreach ($recentPasswords as $aRecentPassword) {
+            if (Utils::verifyPassword($newPassword, $aRecentPassword['password_hash'])) {
+                throw new PasswordChangeException("You cannot use any of your last {$max} passwords");
+            }
+        }
     }
 
 }
