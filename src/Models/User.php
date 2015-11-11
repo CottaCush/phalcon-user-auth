@@ -18,6 +18,12 @@ use UserAuth\Libraries\Utils;
 
 /**
  * Class User
+ * @property string password
+ * @property string updated_at
+ * @property string created_at
+ * @property int id
+ * @property string email
+ * @property int status
  * @author Tega Oghenekohwo <tega@cottacush.com>
  * @package UserAuth\models
  */
@@ -44,38 +50,6 @@ class User extends BaseModel
         self::STATUS_ACTIVE => 'Active',
         self::STATUS_DISABLED => 'Disabled'
     ];
-
-    /**
-     * @property
-     * @var int
-     */
-    protected $id;
-
-    /**
-     * @var string
-     */
-    protected $email;
-
-    /**
-     * @var string
-     */
-    protected $password;
-
-    /**
-     * @var string
-     */
-    protected $created_at;
-
-    /**
-     * @var string
-     */
-    protected $updated_at;
-
-    /**
-     * @var integer
-     */
-    protected $status;
-
 
     /**
      * Returns the name of the table that holds the user's information
