@@ -26,9 +26,9 @@ class ErrorMessages
 
     const STATUS_UPDATE_FAILED = "Status update failed";
 
-    const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds " .UserPasswordReset::MAX_TOKEN_LENGTH. " characters";
+    const RESET_PASSWORD_TOKEN_TOO_LONG = "The reset password token provided exceeds %s characters";
 
-    const RESET_PASSWORD_TOKEN_TOO_SHORT = "The reset password token provided is less than " .UserPasswordReset::MIN_TOKEN_LENGTH. " characters";
+    const RESET_PASSWORD_TOKEN_TOO_SHORT = "The reset password token provided is less than %s characters";
 
     const RESET_PASSWORD_FAILED = "Password reset failed";
 
