@@ -3,8 +3,6 @@
 namespace Tests;
 
 use Phalcon\DI;
-use UserAuth\Models\User;
-use \Phalcon\Exception;
 
 /**
  * Test Class for User Login
@@ -14,9 +12,6 @@ use \Phalcon\Exception;
  */
 class LoginTest extends \UnitTestCase
 {
-    private $email;
-    private $password;
-
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();
@@ -53,29 +48,5 @@ class LoginTest extends \UnitTestCase
         $this->password = $this->valid_test_password;
         $response = $this->login();
         $this->assertNotEmpty($response, "Test Login Assertion: Valid email and valid password");
-    }
-
-    /**
-     * This method must throw and exception when called for the test to Pass
-     */
-    public function loginAndCatchAuthenticationException()
-    {
-        try {
-            $this->login();
-            //if it executes this point, print a message to say that test has failed
-            $this->fail("Exception was not thrown on email " . $this->email . " and password " . $this->password);
-        } catch (Exception $e) {
-            $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
-        }
-    }
-
-    /**
-     * Authenticate a user
-     * @return bool
-     */
-    private function login()
-    {
-        $user = new User();
-        return $user->authenticate($this->email, $this->password);
     }
 }

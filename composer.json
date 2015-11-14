@@ -20,7 +20,7 @@
   "require": {
     "php": ">=5.3.3",
     "ext-phalcon" : ">=2.0.0",
-    "phalcon/incubator": "dev-master",
+    "phalcon/incubator": "2.0.8",
     "robmorgan/phinx": "^0.4.6"
   },
   "require-dev": {

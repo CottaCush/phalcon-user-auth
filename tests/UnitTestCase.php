@@ -4,6 +4,11 @@ use Phalcon\DI;
 use Phalcon\Test\UnitTestCase as PhalconTestCase;
 use UserAuth\Models\User;
 
+/**
+ * This class serves as a base test case for the other test classes
+ * Class UnitTestCase
+ * @author Tega Oghenekohwo <tega@cottacush.com>
+ */
 abstract class UnitTestCase extends PhalconTestCase
 {
     /**
@@ -30,6 +35,16 @@ abstract class UnitTestCase extends PhalconTestCase
      * @var integer variable to save the ID of the first created user
      */
     protected $user_id_2;
+
+    /**
+     * @var string email to use for login
+     */
+    protected $email;
+
+    /**
+     * @var string password to use for login
+     */
+    protected $password;
 
     /**
      * @var \Phalcon\Config
@@ -101,5 +116,29 @@ abstract class UnitTestCase extends PhalconTestCase
         if (empty($this->user_id) || empty($this->user_id_2)) {
             die("Set up failed for Password Change Test");
         }
+    }
+
+
+    /**
+     * This method must throw and exception when called for the test to pass
+     */
+    public function loginAndCatchAuthenticationException()
+    {
+        try {
+            $this->login();
+            //if it executes this point, print a message to say that test has failed
+            $this->fail("Exception was not thrown on email " . $this->email . " and password " . $this->password);
+        } catch (Exception $e) {
+            $this->assertInstanceOf('UserAuth\Exceptions\UserAuthenticationException', $e);
+        }
+    }
+
+    /**
+     * Authenticate a user
+     * @return bool
+     */
+    public function login()
+    {
+        return (new User())->authenticate($this->email, $this->password);
     }
 }
