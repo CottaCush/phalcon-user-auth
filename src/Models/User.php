@@ -302,6 +302,7 @@ class User extends BaseModel
      */
     public function changeUserStatus($email, $newStatus)
     {
+        /* @var \UserAuth\Models\User */
         $user = $this->getUserByEmail($email);
         if (empty($user)) {
             throw new StatusChangeException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
@@ -316,7 +317,6 @@ class User extends BaseModel
         }
 
         //all is fine
-        $user = User::findFirst($this->id);
         $user->status = (int) $newStatus;
         if (!$user->save()) {
             throw new StatusChangeException(ErrorMessages::STATUS_UPDATE_FAILED);
