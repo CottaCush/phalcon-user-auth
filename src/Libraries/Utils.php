@@ -70,4 +70,14 @@ class Utils
 
         return substr($password, 0, strlen($password) - 1) . $shuffledSymbols[0];
     }
+
+    /**
+     * Get current date and time
+     * @author Tega Oghenekohwo <tega@cottacush.com>
+     * @return bool|string
+     */
+    public static function getCurrentDateTime()
+    {
+        return date('Y-m-d H:i:s');
+    }
 }
