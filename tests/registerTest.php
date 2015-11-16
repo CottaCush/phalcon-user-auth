@@ -14,9 +14,6 @@ use UserAuth\Models\User;
  */
 class RegisterTest extends \UnitTestCase
 {
-    private $email;
-    private $password;
-
     public function setUp(\Phalcon\DiInterface $di = NULL, \Phalcon\Config $config = NULL)
     {
         $this->clearTables();

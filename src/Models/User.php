@@ -103,6 +103,13 @@ class User extends BaseModel
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
+
+        $this->hasMany('id', 'UserAuth\Models\UserLoginHistory', 'user_id', [
+            'alias' => 'PasswordResets',
+            'foreignKey' => [
+                'action' => Relation::ACTION_CASCADE,
+            ],
+        ]);
     }
 
 
@@ -156,11 +163,13 @@ class User extends BaseModel
     /**
      * @param string $email
      * @param string $password
+     * @param array $options ..other options e.g. user_agent, ip_address.
      * @return $this
      * @throws UserAuthenticationException
      */
-    public function authenticate($email, $password)
+    public function authenticate($email, $password, $options = [])
     {
+        /* @var $this */
         $user = User::findFirst([
             "email = :email:",
             'bind' => ['email' => $email]
@@ -170,12 +179,21 @@ class User extends BaseModel
             throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
 
+        $options['user_id'] = $user->id;
+
         //validate password
         if (!Utils::verifyPassword($password, $user->password)) {
+            //log status of login
+            $options['login_status'] = UserLoginHistory::LOGIN_STATUS_FAILED;
+            UserLoginHistory::getInstance()->addLog($options);
             throw new UserAuthenticationException(ErrorMessages::INVALID_AUTHENTICATION_DETAILS);
         }
 
         $this->validateStatus($user->status);
+
+        //log status of login
+        $options['login_status'] = UserLoginHistory::LOGIN_STATUS_SUCCESS;
+        UserLoginHistory::getInstance()->addLog($options);
 
         return $user;
     }
@@ -302,6 +320,7 @@ class User extends BaseModel
      */
     public function changeUserStatus($email, $newStatus)
     {
+        /* @var \UserAuth\Models\User */
         $user = $this->getUserByEmail($email);
         if (empty($user)) {
             throw new StatusChangeException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
@@ -316,7 +335,6 @@ class User extends BaseModel
         }
 
         //all is fine
-        $user = User::findFirst($this->id);
         $user->status = (int) $newStatus;
         if (!$user->save()) {
             throw new StatusChangeException(ErrorMessages::STATUS_UPDATE_FAILED);
