@@ -28,8 +28,10 @@ class ResetPasswordSetTokenUnique extends AbstractMigration
     public function change()
     {
         if ($this->hasTable('user_password_resets')) {
-            $sql = file_get_contents(dirname(__FILE__) . '/sql/20151109234704.sql');
-            $this->execute($sql);
+            $table = $this->table('user_password_resets');
+            $table->addIndex('token', [
+                'unique' => true
+            ])->update();
         }
     }
 }
