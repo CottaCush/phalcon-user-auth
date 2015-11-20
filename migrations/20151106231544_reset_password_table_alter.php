@@ -28,8 +28,14 @@ class ResetPasswordTableAlter extends AbstractMigration
     public function change()
     {
         if ($this->hasTable('user_password_resets')) {
-            $sql = file_get_contents(dirname(__FILE__) . '/sql/20151106231544.sql');
-            $this->execute($sql);
+            $table = $this->table('user_password_resets');
+
+            $table->addColumn('date_of_expiry', 'integer', [
+                'length' => 11,
+                'after' => 'date_requested',
+                'null' => true,
+                'comment' => 'if value is null, then the token never expires',
+            ])->update();
         }
     }
 }
