@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: tegaoghenekohwo
- * Date: 26/10/15
- * Time: 02:00
- */
 
 namespace UserAuth\Models;
 
@@ -12,6 +6,11 @@ use Phalcon\Mvc\Model;
 use UserAuth\Exceptions\ResetPasswordException;
 use UserAuth\Libraries\Utils;
 
+/**
+ * Class UserPasswordReset
+ * @package UserAuth\Models
+ * @author Tega Oghenekohwo <tega@cottacush.com>
+ */
 class UserPasswordReset extends BaseModel
 {
     /**
