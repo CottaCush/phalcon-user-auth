@@ -74,24 +74,24 @@ class LoginHistoryTest extends \UnitTestCase
         }
 
         //Fetch paginated records (page 1)
-        $loginDetails = (new User())->getLoginHistory($this->email, 1, 10);
+        $loginHistory = (new User())->getLoginHistory($this->email, 1, 10);
         $properties = ['first', 'before', 'items', 'current', 'last', 'next', 'total_pages', 'total_items', 'limit'];
-        $response = Utils::validateObjectHasAllProperties($properties, $loginDetails);
+        $response = Utils::validateObjectHasAllProperties($properties, $loginHistory);
         $this->assertTrue($response);
 
-        $this->assertEquals(10, count($loginDetails->items));
-        $this->assertEquals(1, $loginDetails->current);
-        $this->assertEquals(1, $loginDetails->before);
-        $this->assertEquals(2, $loginDetails->next);
+        $this->assertEquals(10, count($loginHistory->items));
+        $this->assertEquals(1, $loginHistory->current);
+        $this->assertEquals(1, $loginHistory->before);
+        $this->assertEquals(2, $loginHistory->next);
 
         //fetch next set of records (page 2)
-        $loginDetails = (new User())->getLoginHistory($this->email, 2, 10);
-        $this->assertEquals(10, count($loginDetails->items));
-        $this->assertEquals(2, $loginDetails->current);
-        $this->assertEquals(1, $loginDetails->before);
+        $loginHistory = (new User())->getLoginHistory($this->email, 2, 10);
+        $this->assertEquals(10, count($loginHistory->items));
+        $this->assertEquals(2, $loginHistory->current);
+        $this->assertEquals(1, $loginHistory->before);
 
         //page 3 should be empty
-        $loginDetails = (new User())->getLoginHistory($this->email, 3, 10);
-        $this->assertEquals(0, count($loginDetails->items));
+        $loginHistory = (new User())->getLoginHistory($this->email, 3, 10);
+        $this->assertEquals(0, count($loginHistory->items));
     }
 }
