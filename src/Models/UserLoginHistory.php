@@ -3,6 +3,7 @@
 namespace UserAuth\Models;
 
 use \Phalcon\Di;
+use Phalcon\Paginator\Adapter\QueryBuilder as PaginatorQueryBuilder;
 use UserAuth\Libraries\Utils;
 
 /**
@@ -51,10 +52,12 @@ class UserLoginHistory extends BaseModel
 
     /**
      * @param int $user_id
+     * @return $this
      */
     public function setUserId($user_id)
     {
         $this->user_id = $user_id;
+        return $this;
     }
 
     /**
@@ -166,5 +169,26 @@ class UserLoginHistory extends BaseModel
     public static function getInstance()
     {
         return new self();
+    }
+
+    /**
+     * @param $page
+     * @param $limit
+     * @return \stdClass
+     */
+    public function fetchLoginHistory($page, $limit)
+    {
+        $builder = $this->getModelsManager()->createBuilder()
+            ->columns('*')
+            ->where("user_id = :user_id:", ['user_id' => $this->user_id])
+            ->from(UserLoginHistory::class);
+
+        $paginator = new PaginatorQueryBuilder([
+            "builder" => $builder,
+            "limit"   => empty($limit) || $limit < 1 ? self::DEFAULT_PAGE_LIMIT : $limit,
+            "page"    => $page < 1 ? 1 : $page
+        ]);
+
+        return $paginator->getPaginate();
     }
 }

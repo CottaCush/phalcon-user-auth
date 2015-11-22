@@ -80,4 +80,34 @@ class Utils
     {
         return date('Y-m-d H:i:s');
     }
+
+    /**
+     * @param array $keys
+     * @param array $array
+     * @return bool
+     */
+    public static function validateArrayHasAllKeys(array $keys, array $array)
+    {
+        foreach ($keys as $aKey) {
+            if (!array_key_exists($aKey, $array)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param array $properties
+     * @param $object
+     * @return bool
+     */
+    public static function validateObjectHasAllProperties(array $properties, $object)
+    {
+        foreach ($properties as $aProperty) {
+            if (!property_exists($object, $aProperty)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
