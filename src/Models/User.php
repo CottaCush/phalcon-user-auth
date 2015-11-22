@@ -442,6 +442,7 @@ class User extends BaseModel
         $this->validateStatus($user->status);
 
         //check if token is valid
+        /* @var \UserAuth\Models\UserPasswordReset */
         $tokenData = (new UserPasswordReset())->getTokenData($token);
         if (empty($tokenData)) {
             throw new ResetPasswordException(ErrorMessages::INVALID_RESET_PASSWORD_TOKEN);
@@ -458,6 +459,23 @@ class User extends BaseModel
         }
 
         return $this->updatePassword((int) $user->id, $newPassword, $token);
+    }
+
+    /**
+     * @param $email
+     * @param $page
+     * @param $limit
+     * @return \stdClass
+     * @throws UserAuthenticationException
+     */
+    public function getLoginHistory($email, $page, $limit)
+    {
+        $user = $this->getUserByEmail($email);
+        if ($user == false) {
+            throw new UserAuthenticationException(ErrorMessages::EMAIL_DOES_NOT_EXIST);
+        }
+
+        return UserLoginHistory::getInstance()->setUserId($user->id)->fetchLoginHistory($page, $limit);
     }
 
 }
