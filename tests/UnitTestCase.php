@@ -47,6 +47,11 @@ abstract class UnitTestCase extends PhalconTestCase
     protected $password;
 
     /**
+     * @var null the user type id to use for user creation
+     */
+    protected  $user_type_id = null;
+
+    /**
      * @var \Phalcon\Config
      */
     protected $_config;

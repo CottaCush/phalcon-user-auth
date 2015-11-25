@@ -31,10 +31,15 @@ class RegisterTest extends \UnitTestCase
         $this->email = "abc@y";
         $this->registerAndCatchUserCreationException();
 
-
-        //set a valid email, and a password
+        //set a valid email, and a valid password but with a wrong user type id
         $this->email = $this->valid_test_email;
         $this->password = $this->valid_test_password;
+        $this->user_type_id = 100;
+        $this->registerAndCatchUserCreationException();
+
+
+        //reset the user type ID
+        $this->user_type_id = null;
         $response = $this->register();
         $this->assertNotFalse($response);
 
@@ -59,7 +64,7 @@ class RegisterTest extends \UnitTestCase
     private function register()
     {
         $user = new User();
-        return $user->createUser($this->email, $this->password);
+        return $user->createUser($this->email, $this->password, false, $this->user_type_id);
     }
 
     public function registerAndCatchUserCreationException()
