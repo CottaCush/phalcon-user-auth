@@ -24,6 +24,7 @@ use UserAuth\Libraries\Utils;
  * @property int id
  * @property string email
  * @property int status
+ * @property int/null user_type_id
  * @author Tega Oghenekohwo <tega@cottacush.com>
  * @package UserAuth\models
  */
@@ -90,26 +91,38 @@ class User extends BaseModel
      */
     public function initialize()
     {
-        $this->hasMany('id', 'UserAuth\Models\UserPasswordChange', 'user_id', [
+        $this->hasMany('id', UserPasswordChange::class, 'user_id', [
             'alias' => 'PasswordChanges',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
 
-        $this->hasMany('id', 'UserAuth\Models\UserPasswordReset', 'user_id', [
+        $this->hasMany('id', UserPasswordReset::class, 'user_id', [
             'alias' => 'PasswordResets',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
 
-        $this->hasMany('id', 'UserAuth\Models\UserLoginHistory', 'user_id', [
+        $this->hasMany('id', UserLoginHistory::class, 'user_id', [
             'alias' => 'PasswordResets',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
+
+        $this->belongsTo(
+            "user_type_id",
+            UserType::class,
+            "id",
+            [
+                "foreignKey" => [
+                    "allowNulls" => true,
+                    "message" => "The user type specified is invalid!"
+                ]
+            ]
+        );
     }
 
 
@@ -133,15 +146,17 @@ class User extends BaseModel
      * @param string $email
      * @param string $password
      * @param bool|false $setActive
+     * @param int/null $userTypeId
      * @return int the ID of the created user
      * @throws UserCreationException
      */
-    public function createUser($email, $password, $setActive = false)
+    public function createUser($email, $password, $setActive = false, $userTypeId = null)
     {
         $this->email = $email;
         $this->password = $password;
         $this->created_at = date("Y-m-d H:i:s");
         $this->status = $setActive ? self::STATUS_ACTIVE : self::STATUS_INACTIVE;
+        $this->user_type_id = $userTypeId;
         if (!$this->create()) {
             throw new UserCreationException($this->getMessages());
         }
@@ -228,10 +243,10 @@ class User extends BaseModel
         $this->validateStatus($user->status);
 
         //Validate new password
-        UserPasswordChange::validateNewPassword((int) $user->id, $newPassword, $max);
+        UserPasswordChange::validateNewPassword((int)$user->id, $newPassword, $max);
 
         //if all goes well, proceed to update the password
-        return $this->updatePassword((int) $user->id, $newPassword);
+        return $this->updatePassword((int)$user->id, $newPassword);
     }
 
     /**
@@ -335,7 +350,7 @@ class User extends BaseModel
         }
 
         //all is fine
-        $user->status = (int) $newStatus;
+        $user->status = (int)$newStatus;
         if (!$user->save()) {
             throw new StatusChangeException(ErrorMessages::STATUS_UPDATE_FAILED);
         }
@@ -390,8 +405,8 @@ class User extends BaseModel
 
         $this->validateStatus($user->status);
 
-        $tokenLength = is_null($tokenLength) ? UserPasswordReset::DEFAULT_TOKEN_LENGTH : (int) $tokenLength;
-        $expiry = is_null($expiry) ? UserPasswordReset::DEFAULT_TOKEN_EXPIRY_TIME : (int) $expiry;
+        $tokenLength = is_null($tokenLength) ? UserPasswordReset::DEFAULT_TOKEN_LENGTH : (int)$tokenLength;
+        $expiry = is_null($expiry) ? UserPasswordReset::DEFAULT_TOKEN_EXPIRY_TIME : (int)$expiry;
 
         return (new UserPasswordReset())->generateToken($user->id, $tokenLength, $expires, $expiry);
     }
@@ -448,17 +463,17 @@ class User extends BaseModel
             throw new ResetPasswordException(ErrorMessages::INVALID_RESET_PASSWORD_TOKEN);
         }
 
-        $expires = (int) $tokenData->expires;
-        if ( $expires=== 1 && time() > $tokenData->date_of_expiry) {
+        $expires = (int)$tokenData->expires;
+        if ($expires === 1 && time() > $tokenData->date_of_expiry) {
             throw new ResetPasswordException(ErrorMessages::EXPIRED_RESET_PASSWORD_TOKEN);
         }
 
         //proceed to update password
         if ($expires === 0) {
-            return $this->updatePassword((int) $user->id, $newPassword);
+            return $this->updatePassword((int)$user->id, $newPassword);
         }
 
-        return $this->updatePassword((int) $user->id, $newPassword, $token);
+        return $this->updatePassword((int)$user->id, $newPassword, $token);
     }
 
     /**
