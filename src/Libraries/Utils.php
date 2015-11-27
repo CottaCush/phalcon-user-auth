@@ -105,7 +105,6 @@ class Utils
     {
         foreach ($properties as $aProperty) {
             if (!property_exists($object, $aProperty)) {
-                var_dump($aProperty);
                 return false;
             }
         }
