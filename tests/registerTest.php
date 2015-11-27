@@ -34,7 +34,7 @@ class RegisterTest extends \UnitTestCase
         //set a valid email, and a valid password but with a wrong user type id
         $this->email = $this->valid_test_email;
         $this->password = $this->valid_test_password;
-        $this->user_type_id = 100;
+        $this->user_type_id = -100;
         $this->registerAndCatchUserCreationException();
 
 

@@ -53,6 +53,11 @@ abstract class UnitTestCase extends PhalconTestCase
     protected  $user_type_id = null;
 
     /**
+     * @var string sample user type name used for user creation
+     */
+    protected $sample_user_type_name = 'test';
+
+    /**
      * @var \Phalcon\Config
      */
     protected $_config;
@@ -123,7 +128,7 @@ abstract class UnitTestCase extends PhalconTestCase
     public function createUsers()
     {
         //first create user types
-        $userTypeTest = (new UserType())->createUserType('test');
+        $userTypeTest = (new UserType())->createUserType($this->sample_user_type_name);
         if (empty($userTypeTest)) {
             die("Set up failed while creating user type");
         }

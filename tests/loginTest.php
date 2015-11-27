@@ -54,6 +54,8 @@ class LoginTest extends \UnitTestCase
         $response = $this->login();
         $this->assertNotEmpty($response, "Test Login Assertion: Valid email and valid password");
 
+        $this->assertEquals($this->sample_user_type_name, $response->UserType->name);
+
         $relationShips = [
             'PasswordChanges',
             'PasswordResets',
