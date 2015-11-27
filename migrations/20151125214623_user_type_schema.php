@@ -29,9 +29,9 @@ class UserTypeSchema extends AbstractMigration
     {
         if (!$this->hasTable('user_types')) {
             $this->table('user_types')
-                ->addColumn('name', 'integer', ['length' => 100])
+                ->addColumn('name', 'string', ['length' => 100])
                 ->addColumn('created_at', 'datetime', ['null' => false])
-                ->addColumn('updated_at', 'datetime', ['null' => false])
+                ->addColumn('updated_at', 'datetime', ['null' => true])
                 ->create();
         }
 
