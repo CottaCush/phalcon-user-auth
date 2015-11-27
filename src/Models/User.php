@@ -106,23 +106,19 @@ class User extends BaseModel
         ]);
 
         $this->hasMany('id', UserLoginHistory::class, 'user_id', [
-            'alias' => 'PasswordResets',
+            'alias' => 'LoginHistory',
             'foreignKey' => [
                 'action' => Relation::ACTION_CASCADE,
             ],
         ]);
 
-        $this->belongsTo(
-            "user_type_id",
-            UserType::class,
-            "id",
-            [
-                "foreignKey" => [
-                    "allowNulls" => true,
-                    "message" => "The user type specified is invalid!"
-                ]
-            ]
-        );
+        $this->belongsTo("user_type_id", UserType::class, "id", [
+            "alias" => "UserType",
+            "foreignKey" => [
+                "allowNulls" => true,
+                "message" => "The user type specified is invalid!"
+            ],
+        ]);
     }
 
 

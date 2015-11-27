@@ -122,12 +122,18 @@ abstract class UnitTestCase extends PhalconTestCase
      */
     public function createUsers()
     {
+        //first create user types
+        $userTypeTest = (new UserType())->createUserType('test');
+        if (empty($userTypeTest)) {
+            die("Set up failed while creating user type");
+        }
+
         //Create two new users, one account active and one account inactive
-        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
+        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true, $userTypeTest);
         $this->user_id_2 = (new User())->createUser($this->valid_test_email_2, $this->valid_test_password, false);
 
         if (empty($this->user_id) || empty($this->user_id_2)) {
-            die("Set up failed for Password Change Test");
+            die("Set up failed while creating users");
         }
     }
 

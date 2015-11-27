@@ -56,15 +56,20 @@ class UserTypeTest extends \UnitTestCase
 
     private function createUserType($name)
     {
-        return  (new UserType())->createUserType($name);
+        return (new UserType())->createUserType($name);
     }
 
+    /**
+     * Called only within this test class
+     * @param $name
+     * @param $exceptionClass
+     */
     private function exception($name, $exceptionClass)
     {
         try {
             $this->createUserType($name);
             //if it executes this point, print a message to say that test has failed
-            $this->fail("Exception was not thrown on registration for email " . $this->email . " and password " . $this->password);
+            $this->fail("Exception was not thrown when user type name was {$name}");
         } catch (Exception $e) {
             $this->assertInstanceOf($exceptionClass, $e);
         }
