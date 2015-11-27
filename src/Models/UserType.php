@@ -3,6 +3,9 @@
 namespace UserAuth\Models;
 
 use \Phalcon\Di;
+use Phalcon\Mvc\Model\Validator\PresenceOf;
+use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
+use UserAuth\Exceptions\UserTypeException;
 use UserAuth\Libraries\Utils;
 
 /**
@@ -102,12 +105,51 @@ class UserType extends BaseModel
     }
 
     /**
-     * Get an instance of this class
-     * @author Tega Oghenekohwo <tega@cottacush.com>
-     * @return $this
+     * Validate user type entered
+     * @return bool
      */
-    public static function getInstance()
+    public function validation()
     {
-        return new self();
+        $this->validate(new PresenceOf([
+            'field' => 'name',
+            'message' => 'User type name must be supplied'
+        ]));
+
+        $this->validate(new UniquenessValidator(array(
+            'field' => 'name',
+            'message' => 'Sorry, the user type already exists'
+        )));
+
+
+        if ($this->validationHasFailed() == true) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create  user type/role
+     * @param string $name
+     * @return int
+     * @throws UserTypeException
+     */
+    public function createUserType($name)
+    {
+        $userType = new self();
+        $userType->name = $name;
+        if (!$userType->create()) {
+            throw new UserTypeException($this->getMessages());
+        }
+        return $userType->id;
+    }
+
+    /**
+     * Return all user types/roles
+     * @return $this[]
+     */
+    public function getUserTypes()
+    {
+        return $this->find();
     }
 }

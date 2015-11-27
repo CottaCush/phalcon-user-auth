@@ -3,6 +3,7 @@
 use Phalcon\DI;
 use Phalcon\Test\UnitTestCase as PhalconTestCase;
 use UserAuth\Models\User;
+use UserAuth\Models\UserType;
 
 /**
  * This class serves as a base test case for the other test classes
@@ -90,12 +91,19 @@ abstract class UnitTestCase extends PhalconTestCase
      */
     public function clearTables()
     {
-        $users = User::find();
-        $users = $users->toArray();
-        foreach ($users as $user) {
-            $userToDelete = User::findFirst($user['id']);
-            if (!$userToDelete->delete()) {
-                echo "Sorry, we can't delete the user {$user['id']} right now: \n";
+        //deleting records from user class deletes from the other tables except user type
+        $classes = [User::class, UserType::class];
+
+        foreach ($classes as $class) {
+            $model = new $class();
+            if ($model instanceof \UserAuth\Models\BaseModel) {
+                $modelData = $model->find();
+                foreach ($modelData as $row) {
+                    $object = $model->findFirst($row->id);
+                    if (!$object->delete()) {
+                        echo "Sorry, object {$row->id} of class {$class} could not be deleted " . PHP_EOL;
+                    }
+                }
             }
         }
     }
