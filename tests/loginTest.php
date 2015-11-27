@@ -3,6 +3,11 @@
 namespace Tests;
 
 use Phalcon\DI;
+use UserAuth\Libraries\Utils;
+use UserAuth\Models\UserLoginHistory;
+use UserAuth\Models\UserPasswordChange;
+use UserAuth\Models\UserPasswordReset;
+use UserAuth\Models\UserType;
 
 /**
  * Test Class for User Login
@@ -48,5 +53,21 @@ class LoginTest extends \UnitTestCase
         $this->password = $this->valid_test_password;
         $response = $this->login();
         $this->assertNotEmpty($response, "Test Login Assertion: Valid email and valid password");
+
+        $relationShips = [
+            'PasswordChanges',
+            'PasswordResets',
+            'LoginHistory',
+            'UserType'
+        ];
+
+        //check that all of the following relationships are valid
+        foreach ($relationShips as $aRelationShip) {
+            $response->{$aRelationShip};
+        }
+
+        $requiredAttributes = ['id', 'email', 'password', 'status', 'created_at', 'updated_at', 'user_type_id'];
+        $validate = Utils::validateObjectHasAllProperties($requiredAttributes, $response);
+        $this->assertTrue($validate);
     }
 }
