@@ -3,6 +3,7 @@
 use Phalcon\DI;
 use Phalcon\Test\UnitTestCase as PhalconTestCase;
 use UserAuth\Models\User;
+use UserAuth\Models\UserType;
 
 /**
  * This class serves as a base test case for the other test classes
@@ -47,6 +48,16 @@ abstract class UnitTestCase extends PhalconTestCase
     protected $password;
 
     /**
+     * @var null the user type id to use for user creation
+     */
+    protected  $user_type_id = null;
+
+    /**
+     * @var string sample user type name used for user creation
+     */
+    protected $sample_user_type_name = 'test';
+
+    /**
      * @var \Phalcon\Config
      */
     protected $_config;
@@ -85,12 +96,19 @@ abstract class UnitTestCase extends PhalconTestCase
      */
     public function clearTables()
     {
-        $users = User::find();
-        $users = $users->toArray();
-        foreach ($users as $user) {
-            $userToDelete = User::findFirst($user['id']);
-            if (!$userToDelete->delete()) {
-                echo "Sorry, we can't delete the user {$user['id']} right now: \n";
+        //deleting records from user class deletes from the other tables except user type
+        $classes = [User::class, UserType::class];
+
+        foreach ($classes as $class) {
+            $model = new $class();
+            if ($model instanceof \UserAuth\Models\BaseModel) {
+                $modelData = $model->find();
+                foreach ($modelData as $row) {
+                    $object = $model->findFirst($row->id);
+                    if (!$object->delete()) {
+                        echo "Sorry, object {$row->id} of class {$class} could not be deleted " . PHP_EOL;
+                    }
+                }
             }
         }
     }
@@ -109,12 +127,18 @@ abstract class UnitTestCase extends PhalconTestCase
      */
     public function createUsers()
     {
+        //first create user types
+        $userTypeTest = (new UserType())->createUserType($this->sample_user_type_name);
+        if (empty($userTypeTest)) {
+            die("Set up failed while creating user type");
+        }
+
         //Create two new users, one account active and one account inactive
-        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true);
+        $this->user_id = (new User())->createUser($this->valid_test_email, $this->valid_test_password, true, $userTypeTest);
         $this->user_id_2 = (new User())->createUser($this->valid_test_email_2, $this->valid_test_password, false);
 
         if (empty($this->user_id) || empty($this->user_id_2)) {
-            die("Set up failed for Password Change Test");
+            die("Set up failed while creating users");
         }
     }
 
