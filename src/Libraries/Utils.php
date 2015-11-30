@@ -110,4 +110,26 @@ class Utils
         }
         return true;
     }
+
+    /**
+     * @param mixed $message
+     * @return string
+     */
+    public static function getMessagesFromStringOrArray($message)
+    {
+        $messages = "";
+        // check if the messages parameter passed is an array or a string
+        if (is_array($message)) {
+            foreach ($message as $m) {
+                //double check to ensure that internal value is not an array
+                if (!is_array($m)) {
+                    $messages .= $m . ",";
+                }
+            }
+        } else {
+            $messages = $message;
+        }
+
+        return $messages;
+    }
 }
