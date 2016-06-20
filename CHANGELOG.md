@@ -20,6 +20,10 @@
 # [1.3.1](https://github.com/CottaCush/phalcon-user-auth/tree/1.3.1) (2016-01-22)
 - Added User Type Feature
 
-# [1.4.0](https://github.com/CottaCush/phalcon-user-auth/tree/1.4.0) (2016-06-22)
+# [1.4.0](https://github.com/CottaCush/phalcon-user-auth/tree/1.4.0) (2016-06-20)
 - Remove deploy scripts
 - Modify README.md for open sourcing
+
+# [1.5.0](https://github.com/CottaCush/phalcon-user-auth/tree/1.5.0) (2016-06-20)
+- Add License File 
+- Modify composer.json for packagist
