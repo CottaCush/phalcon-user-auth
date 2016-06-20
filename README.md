@@ -25,28 +25,10 @@ Requirements
 
 Installation
 ------------
-Step 1
-modify your composer.json
+Step 1  
+`composer require cottacush/phalcon-user-auth`
+run `composer install`
 
-```json
-    "require": {
-        ...
-        "user-auth": "dev-master"
-        ...
-    },
-    "repositories": [
-         ...
-        {
-            "type": "vcs",
-            "url":  " git@bitbucket.org:cottacush/user-auth.git"
-        },
-        ...
-    ]
-```
-
-run `composer update`
-
-
-Step 2
+Step 2  
 Run DB migrations using Phinx from the root of your project like this like this
 `php vendor/bin/phinx migrate`
