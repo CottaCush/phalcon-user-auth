@@ -1,8 +1,8 @@
 {
-  "name" : "user-auth",
+  "name" : "cottacush/phalcon-user-auth",
   "description" : "User Auth is a library for managing user credentials",
   "keywords": ["phalcon", "library", "user", "auth", "login"],
-  "homepage": "https://bitbucket.org/cottacush/user-auth#readme",
+  "homepage": "https://github.com/CottaCush/phalcon-user-auth",
   "type": "library",
   "version" : "1.4.0",
   "authors": [
