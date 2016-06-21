@@ -31,5 +31,8 @@
     "psr-4": {
       "UserAuth\\": "src/"
     }
+  },
+  "scripts": {
+    "test": "phpunit"
   }
 }
