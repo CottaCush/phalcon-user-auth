@@ -31,3 +31,6 @@
 # [1.5.1](https://github.com/CottaCush/phalcon-user-auth/tree/1.5.1) (2016-06-20)
 - Add License to composer.json
 - Restrict PHP version to 5.5 and above
+
+# [1.5.2](https://github.com/CottaCush/phalcon-user-auth/tree/1.5.2) (2016-08-04)
+- Remove Phalcon extension dependency
