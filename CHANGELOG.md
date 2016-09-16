@@ -34,3 +34,6 @@
 
 # [1.5.2](https://github.com/CottaCush/phalcon-user-auth/tree/1.5.2) (2016-08-04)
 - Remove Phalcon extension dependency
+
+# [1.6.0](https://github.com/CottaCush/phalcon-user-auth/tree/1.6.0) (2016-09-16)
+- Change user_agent field in user_login_history to text
