@@ -34,3 +34,7 @@
 
 # [1.5.2](https://github.com/CottaCush/phalcon-user-auth/tree/1.5.2) (2016-08-04)
 - Remove Phalcon extension dependency
+
+# [2.0.0](https://github.com/CottaCush/phalcon-user-auth/tree/2.0.0) (2016-09-20)
+- Update UnitTestCase and Model Validators for Phalcon >= v3.0.0 support
+
