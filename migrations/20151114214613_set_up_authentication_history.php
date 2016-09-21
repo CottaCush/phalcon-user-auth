@@ -31,7 +31,7 @@ class SetUpAuthenticationHistory extends AbstractMigration
             ->addColumn('user_id', 'integer', ['length' => 11])
             ->addColumn('login_status', 'string', ['length' => 100])
             ->addColumn('ip_address', 'string', ['length' => 100, 'null' => true])
-            ->addColumn('user_agent', 'string', ['length' => 100, 'null' => true])
+            ->addColumn('user_agent', 'text')
             ->addColumn('date_logged', 'datetime', ['null' => false])
             ->addForeignKey('user_id', 'user_credentials', ['id'], ['delete' => 'CASCADE', 'update' => 'CASCADE'])
             ->create();

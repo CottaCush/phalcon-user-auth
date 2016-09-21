@@ -49,6 +49,7 @@ If you discover any security related issues, please email <developers@cottacush.
 
 - Tega Oghenekohwo <tega@cottacush.com>
 - Adeyemi Olaoye <yemi@cottacush.com>
+- Adegoke Obasa <goke@cottacush.com>
 - [All Contributors][link-contributors]
 
 ## License
