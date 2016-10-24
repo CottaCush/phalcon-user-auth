@@ -3,8 +3,9 @@
 namespace UserAuth\Models;
 
 use \Phalcon\Di;
-use Phalcon\Mvc\Model\Validator\PresenceOf;
-use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\PresenceOf;
+use Phalcon\Validation\Validator\Uniqueness;
 use UserAuth\Exceptions\UserTypeException;
 use UserAuth\Libraries\Utils;
 
@@ -110,22 +111,18 @@ class UserType extends BaseModel
      */
     public function validation()
     {
-        $this->validate(new PresenceOf([
-            'field' => 'name',
+
+        $validator = new Validation();
+
+        $validator->add('name', new PresenceOf([
             'message' => 'User type name must be supplied'
         ]));
 
-        $this->validate(new UniquenessValidator(array(
-            'field' => 'name',
+        $validator->add('name', new Uniqueness([
             'message' => 'Sorry, the user type already exists'
-        )));
+        ]));
 
-
-        if ($this->validationHasFailed() == true) {
-            return false;
-        }
-
-        return true;
+        return $this->validate($validator);
     }
 
     /**
