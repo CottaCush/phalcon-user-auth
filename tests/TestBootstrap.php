@@ -1,7 +1,9 @@
 <?php
-use Phalcon\DI;
-use Phalcon\DI\FactoryDefault;
+use Phalcon\Di;
+use Phalcon\Di\FactoryDefault;
+use Phalcon\Loader;
 
+ini_set('display_startup_errors', '1');
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 
@@ -31,9 +33,6 @@ include __DIR__ . "/config/loader.php";
 //include application services
 include __DIR__ . "/config/services.php";
 
-//$di = new FactoryDefault();
-//DI::reset();
+Di::reset();
 
-// Add any needed services to the DI here
-
-//DI::setDefault($di);
+Di::setDefault($di);

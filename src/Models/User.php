@@ -6,15 +6,15 @@ use Phalcon\Mvc\Model;
 use Phalcon\Mvc\Model\Relation;
 use Phalcon\Mvc\Model\Transaction\Failed as TransactionFailed;
 use Phalcon\Mvc\Model\Transaction\Manager as TransactionManager;
-use Phalcon\Mvc\Model\Validator\Email as EmailValidator;
-use Phalcon\Mvc\Model\Validator\Uniqueness as UniquenessValidator;
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\Email;
+use Phalcon\Validation\Validator\Uniqueness;
 use UserAuth\Exceptions\StatusChangeException;
 use UserAuth\Exceptions\UserAuthenticationException;
 use UserAuth\Exceptions\PasswordChangeException;
 use UserAuth\Exceptions\ResetPasswordException;
 use UserAuth\Exceptions\UserCreationException;
 use UserAuth\Libraries\Utils;
-
 
 /**
  * Class User
@@ -67,22 +67,17 @@ class User extends BaseModel
      */
     public function validation()
     {
-        $this->validate(new EmailValidator([
-            'field' => 'email',
+        $validator = new Validation();
+        
+        $validator->add('email', new Email([
             'message' => 'Invalid email supplied'
         ]));
 
-        $this->validate(new UniquenessValidator(array(
-            'field' => 'email',
+        $validator->add('email', new Uniqueness(array(
             'message' => 'Sorry, The email has been used by another user'
         )));
 
-
-        if ($this->validationHasFailed() == true) {
-            return false;
-        }
-
-        return true;
+        return $this->validate($validator);
     }
 
 
