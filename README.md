@@ -12,7 +12,7 @@ This library contains functions that manages the entire process of user creation
 Via Composer
 
 ``` bash
-$ composer require cottacush/phalcon
+$ composer require cottacush/phalcon-user-auth
 ```
 
 ```bash

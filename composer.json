@@ -21,11 +21,16 @@
       "name": "Adegoke Obasa",
       "email": "goke@cottacush.com",
       "role": "Contributor"
+    },
+    {
+      "name": "Olawale Lawal",
+      "email": "wale@cottacush.com",
+      "role": "Contributor"
     }
   ],
   "require": {
-    "php": ">=5.5",
-    "phalcon/incubator": "2.0.8",
+    "php": ">=5.6",
+    "phalcon/incubator": "2.0.13",
     "robmorgan/phinx": "^0.5.0"
   },
   "require-dev": {
