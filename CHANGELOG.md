@@ -40,3 +40,7 @@
 
 # [2.0.0](https://github.com/CottaCush/phalcon-user-auth/tree/2.0.0) (2016-09-20)
 - Update UnitTestCase and Model Validators for Phalcon >= v3.0.0 support
+
+
+# [2.0.1](https://github.com/CottaCush/phalcon-user-auth/tree/2.0.1) (2016-09-20)
+- Update PHPUnit and Phinx dependencies
