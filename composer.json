@@ -4,7 +4,7 @@
   "keywords": ["phalcon", "library", "user", "auth", "login"],
   "homepage": "https://github.com/CottaCush/phalcon-user-auth",
   "type": "library",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "authors": [
     {
@@ -26,11 +26,11 @@
   "require": {
     "php": ">=5.5",
     "phalcon/incubator": "^3.0.0",
-    "robmorgan/phinx": "^0.5.0",
+    "robmorgan/phinx": "^0.8",
     "ext-phalcon": ">=3.0.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "~4.0||~5.0"
+    "phpunit/phpunit": "^6.0"
   },
   "autoload": {
     "psr-4": {
