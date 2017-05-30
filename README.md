@@ -12,7 +12,7 @@ This library contains functions that manages the entire process of user creation
 Via Composer
 
 ``` bash
-$ composer require cottacush/phalcon
+$ composer require cottacush/phalcon-user-auth
 ```
 
 ```bash
@@ -34,7 +34,8 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 ## Testing
 
 ``` bash
-$ composer test
+$ cd tests
+$ ../vendor/bin/phpunit 
 ```
 
 ## Contributing
