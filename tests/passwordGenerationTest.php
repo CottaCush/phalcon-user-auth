@@ -26,4 +26,15 @@ class PasswordGenerationTest extends \UnitTestCase
         }
         $this->assertEquals($passwordsArray, array_unique($passwordsArray));
     }
+
+    /**
+     * Test that passwords must contain at least number
+     */
+    public function testPasswordContainsNumber()
+    {
+        for ($i=0; $i<1000; $i++){
+            $password = User::generateRandomPassword();
+            $this->assertTrue(preg_match('/\\d/', $password) > 0);
+        }
+    }
 }
